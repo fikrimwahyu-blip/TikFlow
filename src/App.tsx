@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Download, ShieldCheck, Smartphone, Clipboard, Info, Globe, CircleDollarSign, Image, Video, ChevronDown, ChevronUp, Check, Zap, X, Loader2 } from 'lucide-react';
+import { Download, ShieldCheck, Smartphone, Clipboard, Info, Globe, CircleDollarSign, Image, Video, ChevronDown, ChevronUp, Check, Zap, X, Loader2, AlertCircle } from 'lucide-react';
+import { useTikTok } from './hooks/useTikTok';
+import DownloadResult from './components/DownloadResult';
 
 const LANGUAGES = [
   { code: 'en', flag: '🇺🇸', name: 'English' },
@@ -9,11 +11,21 @@ const LANGUAGES = [
 ];
 
 export default function App() {
-  const [url, setUrl] = useState('');
+  // TikTok download hook
+  const { 
+    inputUrl, 
+    setInputUrl, 
+    isLoading, 
+    error, 
+    result, 
+    handleDownload: hookHandleDownload, 
+    clearError 
+  } = useTikTok();
+
+  // UI state
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [isLangOpen, setIsLangOpen] = useState(false);
   const [activeLang, setActiveLang] = useState('en');
-  const [isLoading, setIsLoading] = useState(false);
   const langMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -29,24 +41,24 @@ export default function App() {
   const handlePaste = async () => {
     try {
       const text = await navigator.clipboard.readText();
-      setUrl(text);
+      setInputUrl(text);
+      // Clear error when user pastes new URL
+      if (error) clearError();
     } catch (err) {
       console.error('Failed to read clipboard contents: ', err);
     }
   };
 
   const handleClear = () => {
-    setUrl('');
+    setInputUrl('');
+    // Clear error when user clears input
+    if (error) clearError();
   };
 
-  const handleDownload = (e: React.FormEvent) => {
+  const handleDownload = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!url) return;
-    setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      alert(`Mock downloading from: ${url}`);
-    }, 1500);
+    if (!inputUrl) return;
+    await hookHandleDownload();
   };
 
   return (
@@ -136,12 +148,16 @@ export default function App() {
               <input
                 type="text"
                 placeholder="Paste TikTok video link here..."
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
+                value={inputUrl}
+                onChange={(e) => {
+                  setInputUrl(e.target.value);
+                  // Clear error when user types
+                  if (error) clearError();
+                }}
                 required
                 className="w-full h-14 sm:h-16 pl-5 pr-14 rounded-xl text-gray-900 text-sm sm:text-base placeholder-gray-400 bg-white border-2 border-transparent focus:border-[#195FD7]/30 focus:outline-none shadow-lg transition-all"
               />
-              {url ? (
+              {inputUrl ? (
                 <button 
                   type="button" 
                   onClick={handleClear}
@@ -182,6 +198,30 @@ export default function App() {
             </button>
 
           </form>
+
+          {/* Error Display */}
+          {error && (
+            <div className="w-full max-w-2xl mx-auto mt-4 flex items-start gap-3 bg-red-50 border border-red-200 rounded-lg px-4 py-3">
+              <AlertCircle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" strokeWidth={2} />
+              <div className="flex-1">
+                <p className="text-sm text-red-800 font-medium">{error}</p>
+              </div>
+              <button
+                onClick={clearError}
+                className="p-1 text-red-600 hover:text-red-800 transition-colors"
+                aria-label="Dismiss error"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+
+          {/* Download Result */}
+          {result && (
+            <div className="w-full max-w-2xl mx-auto mt-6">
+              <DownloadResult result={result} />
+            </div>
+          )}
 
         </div>
       </section>
