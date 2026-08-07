@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Download, ShieldCheck, Smartphone, Clipboard, Info, Globe, CircleDollarSign, Image, Video, ChevronDown, ChevronUp, Check, Zap } from 'lucide-react';
+import { Download, ShieldCheck, Smartphone, Clipboard, Info, Globe, CircleDollarSign, Image, Video, ChevronDown, ChevronUp, Check, Zap, X, Loader2 } from 'lucide-react';
 
 const LANGUAGES = [
   { code: 'en', flag: '🇺🇸', name: 'English' },
@@ -13,6 +13,7 @@ export default function App() {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [isLangOpen, setIsLangOpen] = useState(false);
   const [activeLang, setActiveLang] = useState('en');
+  const [isLoading, setIsLoading] = useState(false);
   const langMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -34,10 +35,18 @@ export default function App() {
     }
   };
 
+  const handleClear = () => {
+    setUrl('');
+  };
+
   const handleDownload = (e: React.FormEvent) => {
     e.preventDefault();
     if (!url) return;
-    alert(`Mock downloading from: ${url}`);
+    setIsLoading(true);
+    setTimeout(() => {
+      setIsLoading(false);
+      alert(`Mock downloading from: ${url}`);
+    }, 1500);
   };
 
   return (
@@ -106,8 +115,8 @@ export default function App() {
       </header>
 
       {/* Hero Section */}
-      <section className="w-full bg-[#195FD7] px-4 py-12 sm:py-16 flex flex-col items-center justify-center text-center">
-        <div className="max-w-2xl w-full mx-auto space-y-8">
+      <section className="w-full bg-[#195FD7] px-4 py-8 sm:py-12 flex flex-col items-center justify-center text-center">
+        <div className="max-w-2xl w-full mx-auto space-y-6">
           
           {/* HEADING & SUBTITLE */}
           <div className="space-y-3 sm:space-y-4">
@@ -120,10 +129,10 @@ export default function App() {
           </div>
 
           {/* INPUT & BUTTON FORM */}
-          <form onSubmit={handleDownload} className="w-full space-y-4">
+          <form onSubmit={handleDownload} className="w-full flex flex-col md:flex-row gap-4">
             
-            {/* Input Field with Paste Icon */}
-            <div className="relative w-full">
+            {/* Input Field with Paste/Clear Icon */}
+            <div className="relative flex-1">
               <input
                 type="text"
                 placeholder="Paste TikTok video link here..."
@@ -132,23 +141,44 @@ export default function App() {
                 required
                 className="w-full h-14 sm:h-16 pl-5 pr-14 rounded-xl text-gray-900 text-sm sm:text-base placeholder-gray-400 bg-white border-2 border-transparent focus:border-[#195FD7]/30 focus:outline-none shadow-lg transition-all"
               />
-              <button 
-                type="button" 
-                onClick={handlePaste}
-                aria-label="Paste link"
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-gray-400 hover:text-gray-900 transition-colors bg-gray-50 hover:bg-gray-100 rounded-lg"
-              >
-                <Clipboard className="w-5 h-5" />
-              </button>
+              {url ? (
+                <button 
+                  type="button" 
+                  onClick={handleClear}
+                  aria-label="Clear link"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-gray-400 hover:text-gray-900 transition-colors bg-gray-50 hover:bg-gray-100 rounded-lg"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              ) : (
+                <button 
+                  type="button" 
+                  onClick={handlePaste}
+                  aria-label="Paste link"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-gray-400 hover:text-gray-900 transition-colors bg-gray-50 hover:bg-gray-100 rounded-lg"
+                >
+                  <Clipboard className="w-5 h-5" />
+                </button>
+              )}
             </div>
 
             {/* Download Button */}
             <button
               type="submit"
-              className="w-full h-14 sm:h-16 bg-white text-[#195FD7] font-bold text-base sm:text-lg rounded-xl hover:bg-gray-50 active:scale-[0.99] transition-all shadow-lg flex items-center justify-center gap-2"
+              disabled={isLoading}
+              className="w-full md:w-auto md:px-8 h-14 sm:h-16 bg-white text-[#195FD7] font-bold text-base sm:text-lg rounded-xl hover:bg-gray-50 active:scale-[0.99] disabled:opacity-80 disabled:active:scale-100 transition-all shadow-lg flex items-center justify-center gap-2"
             >
-              <Download className="w-5 h-5" strokeWidth={2.5} />
-              Download
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" strokeWidth={2.5} />
+                  Processing...
+                </>
+              ) : (
+                <>
+                  <Download className="w-5 h-5" strokeWidth={2.5} />
+                  Download
+                </>
+              )}
             </button>
 
           </form>
