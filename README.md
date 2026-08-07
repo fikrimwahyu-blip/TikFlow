@@ -58,20 +58,32 @@ A modern, React-based web application for downloading TikTok videos without wate
    b. **Subscribe to the TikTok Downloader API**:
       - Visit: https://rapidapi.com/atupal2116/api/tiktok-video-downloader-no-watermark1
       - Click "Subscribe to Test" button
-      - Choose a pricing plan (Free tier available with 50-100 requests/month)
+      - Choose **"Basic"** plan (FREE - 50 requests/month)
       - Complete the subscription
    
    c. **Copy your API credentials**:
       - After subscribing, you'll see your API key in the API dashboard
-      - Copy the `x-rapidapi-key` value
+      - Copy the `x-rapidapi-key` value (looks like: `a1b2c3d4e5f6...`)
    
    d. **Update your `.env` file**:
    ```bash
-   VITE_RAPIDAPI_KEY=your_actual_api_key_here
-   VITE_RAPIDAPI_HOST=tiktok-video-downloader-no-watermark.p.rapidapi.com
+   VITE_RAPIDAPI_KEY=a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3
+   VITE_RAPIDAPI_HOST=tiktok-video-downloader-no-watermark1.p.rapidapi.com
    ```
+   
+   **Replace the placeholder with your actual API key from step (c)!**
 
-   > ⚠️ **Important**: Never commit your `.env` file to version control. The `.gitignore` file is configured to exclude it.
+   > ⚠️ **Important**: 
+   > - Never commit your `.env` file to version control
+   > - The API host must have "1" at the end: `no-watermark1.p.rapidapi.com`
+   > - See [SETUP-ENV.md](SETUP-ENV.md) for detailed setup guide
+
+5. **Verify configuration**
+   ```bash
+   bash test-env.sh
+   ```
+   
+   Should output: `✅ All environment variables are configured correctly!`
 
 ## Running the Application
 
