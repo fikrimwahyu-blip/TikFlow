@@ -1,14 +1,12 @@
 /**
  * DownloadResult component
  * Displays TikTok video metadata and download button after successful download
- * Handles binary file download from RapidAPI endpoint
  * @module components/DownloadResult
  */
 
 import React, { useState } from 'react';
 import { Download, User, Eye, Clock, Loader2 } from 'lucide-react';
 import type { TikTokDownloadResult } from '../types/tiktok';
-import { getApiHeaders } from '../services/tiktokService';
 
 interface DownloadResultProps {
   /** Download result data (null if no result) */
@@ -53,21 +51,15 @@ export default function DownloadResult({ result }: DownloadResultProps): React.R
 
   /**
    * Handles download button click
-   * Fetches video file from RapidAPI with proper headers and triggers browser download
+   * Downloads video file from the URL provided by RapidAPI
    */
   const handleDownloadClick = async (): Promise<void> => {
     setIsDownloading(true);
     setDownloadError(null);
 
     try {
-      // Get API headers
-      const headers = getApiHeaders();
-
-      // Fetch the video file from RapidAPI
-      const response = await fetch(result.downloadUrl, {
-        method: 'GET',
-        headers
-      });
+      // Fetch the video file from TikTok CDN (URL from RapidAPI response)
+      const response = await fetch(result.downloadUrl);
 
       if (!response.ok) {
         throw new Error(`Download failed: ${response.status} ${response.statusText}`);
