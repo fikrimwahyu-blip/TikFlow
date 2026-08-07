@@ -16,7 +16,7 @@ const TIKTOK_URL_PATTERN = /^https?:\/\/(www\.|vm\.|vt\.|m\.)?tiktok\.com\/.+/i;
 /**
  * API configuration
  */
-const API_BASE_URL = 'https://tiktok-video-downloader-no-watermark.p.rapidapi.com';
+const API_BASE_URL = 'https://tiktok-video-downloader-no-watermark1.p.rapidapi.com';
 const API_TIMEOUT = 30000; // 30 seconds
 
 /**
@@ -92,19 +92,13 @@ export async function downloadTikTokVideo(url: string): Promise<TikTokDownloadRe
     );
   }
 
-  // Prepare API request
-  const requestBody: TikTokDownloadRequest = {
-    url: trimmedUrl
-  };
-
   try {
-    const response = await axios.post<TikTokApiResponse>(
+    const response = await axios.get<TikTokApiResponse>(
       `${API_BASE_URL}/download`,
-      requestBody,
       {
+        params: { url: trimmedUrl },
         timeout: API_TIMEOUT,
         headers: {
-          'Content-Type': 'application/json',
           'x-rapidapi-key': apiKey,
           'x-rapidapi-host': apiHost
         }
