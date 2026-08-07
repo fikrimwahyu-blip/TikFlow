@@ -1,12 +1,14 @@
 /**
  * DownloadResult component
  * Displays TikTok video metadata and download button after successful download
+ * Handles binary file download from RapidAPI endpoint
  * @module components/DownloadResult
  */
 
-import React from 'react';
-import { Download, User, Eye, Clock } from 'lucide-react';
+import React, { useState } from 'react';
+import { Download, User, Eye, Clock, Loader2 } from 'lucide-react';
 import type { TikTokDownloadResult } from '../types/tiktok';
+import { getApiHeaders } from '../services/tiktokService';
 
 interface DownloadResultProps {
   /** Download result data (null if no result) */
@@ -41,6 +43,9 @@ function formatDuration(duration?: number): string {
  * @returns React component or null if no result
  */
 export default function DownloadResult({ result }: DownloadResultProps): React.ReactElement | null {
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
+
   // Don't render if no result
   if (!result) {
     return null;
@@ -48,10 +53,51 @@ export default function DownloadResult({ result }: DownloadResultProps): React.R
 
   /**
    * Handles download button click
-   * Opens download URL in new tab to trigger browser download
+   * Fetches video file from RapidAPI with proper headers and triggers browser download
    */
-  const handleDownloadClick = (): void => {
-    window.open(result.downloadUrl, '_blank', 'noopener,noreferrer');
+  const handleDownloadClick = async (): Promise<void> => {
+    setIsDownloading(true);
+    setDownloadError(null);
+
+    try {
+      // Get API headers
+      const headers = getApiHeaders();
+
+      // Fetch the video file from RapidAPI
+      const response = await fetch(result.downloadUrl, {
+        method: 'GET',
+        headers
+      });
+
+      if (!response.ok) {
+        throw new Error(`Download failed: ${response.status} ${response.statusText}`);
+      }
+
+      // Get the blob from response
+      const blob = await response.blob();
+
+      // Create object URL and trigger download
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${result.title}.mp4`;
+      document.body.appendChild(a);
+      a.click();
+
+      // Cleanup
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+    } catch (error) {
+      console.error('Download error:', error);
+      setDownloadError(
+        error instanceof Error 
+          ? error.message 
+          : 'Failed to download video. Please try again.'
+      );
+    } finally {
+      setIsDownloading(false);
+    }
   };
 
   return (
@@ -107,13 +153,32 @@ export default function DownloadResult({ result }: DownloadResultProps): React.R
           </div>
 
           {/* Download Button */}
-          <button
-            onClick={handleDownloadClick}
-            className="w-full sm:w-auto px-6 py-3 bg-[#195FD7] text-white font-bold text-sm rounded-lg hover:bg-[#164fbb] active:scale-[0.99] transition-all shadow-sm flex items-center justify-center gap-2"
-          >
-            <Download className="w-4 h-4" strokeWidth={2.5} />
-            Download Video
-          </button>
+          <div className="space-y-2">
+            <button
+              onClick={handleDownloadClick}
+              disabled={isDownloading}
+              className="w-full sm:w-auto px-6 py-3 bg-[#195FD7] text-white font-bold text-sm rounded-lg hover:bg-[#164fbb] active:scale-[0.99] transition-all shadow-sm flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isDownloading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" strokeWidth={2.5} />
+                  Downloading...
+                </>
+              ) : (
+                <>
+                  <Download className="w-4 h-4" strokeWidth={2.5} />
+                  Download Video
+                </>
+              )}
+            </button>
+
+            {/* Download error message */}
+            {downloadError && (
+              <p className="text-sm text-red-600">
+                {downloadError}
+              </p>
+            )}
+          </div>
         </div>
 
       </div>
