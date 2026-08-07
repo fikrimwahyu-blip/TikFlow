@@ -16,7 +16,6 @@ const TIKTOK_URL_PATTERN = /^https?:\/\/(www\.|vm\.|vt\.|m\.)?tiktok\.com\/.+/i;
 /**
  * API configuration
  */
-const API_BASE_URL = 'https://tiktok-video-downloader-no-watermark1.p.rapidapi.com';
 const API_TIMEOUT = 30000; // 30 seconds
 
 /**
@@ -93,14 +92,13 @@ export async function downloadTikTokVideo(url: string): Promise<TikTokDownloadRe
   }
 
   try {
-    // Make POST request with JSON body
-    const response = await axios.post<TikTokApiResponse>(
-      `${API_BASE_URL}/download`,
-      { url: trimmedUrl },
+    // Make GET request with URL as query parameter
+    const response = await axios.get<TikTokApiResponse>(
+      `https://${apiHost}/`,
       {
+        params: { url: trimmedUrl },
         timeout: API_TIMEOUT,
         headers: {
-          'Content-Type': 'application/json',
           'x-rapidapi-key': apiKey,
           'x-rapidapi-host': apiHost
         }
@@ -110,30 +108,24 @@ export async function downloadTikTokVideo(url: string): Promise<TikTokDownloadRe
     // Handle API response
     const apiResponse = response.data;
 
-    if (apiResponse.status === 'error' || !apiResponse.data) {
+    // Check for error response
+    if (apiResponse.code !== 0 || !apiResponse.data) {
       throw new TikTokApiError(
-        apiResponse.message || 'Failed to download video',
-        apiResponse.error || 'API_ERROR'
+        apiResponse.msg || 'Failed to download video',
+        'API_ERROR'
       );
     }
 
     // Extract and return video data
-    const { title, author, cover, downloadUrl, duration, views } = apiResponse.data;
-
-    if (!downloadUrl) {
-      throw new TikTokApiError(
-        'Video download URL not available',
-        'MISSING_DOWNLOAD_URL'
-      );
-    }
+    const videoData = apiResponse.data;
 
     return {
-      title,
-      author,
-      cover,
-      downloadUrl,
-      duration,
-      views
+      title: videoData.title,
+      author: videoData.author.nickname,
+      cover: videoData.cover,
+      downloadUrl: videoData.play, // Use 'play' for no watermark version
+      duration: videoData.duration,
+      views: videoData.play_count
     };
 
   } catch (error) {
@@ -160,8 +152,10 @@ export async function downloadTikTokVideo(url: string): Promise<TikTokDownloadRe
       // HTTP error codes
       switch (statusCode) {
         case 400:
+          // Try to extract error message from response
+          const errorMsg = responseData?.msg || 'Invalid request. Please check the URL and try again.';
           throw new TikTokApiError(
-            responseData?.message || 'Invalid request. Please check the URL and try again.',
+            errorMsg,
             'BAD_REQUEST',
             400
           );
@@ -199,7 +193,7 @@ export async function downloadTikTokVideo(url: string): Promise<TikTokDownloadRe
         
         default:
           throw new TikTokApiError(
-            responseData?.message || 'An unexpected error occurred. Please try again.',
+            responseData?.msg || 'An unexpected error occurred. Please try again.',
             'UNKNOWN_ERROR',
             statusCode
           );

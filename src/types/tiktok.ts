@@ -13,38 +13,88 @@ export interface TikTokDownloadRequest {
 
 /**
  * API response structure from RapidAPI TikTok Downloader
- * Based on API specification in docs/tech.md
+ * Based on actual API response format
  */
 export interface TikTokApiResponse {
-  /** Status of the API request */
-  status: 'success' | 'error';
+  /** Response code: 0 = success, -1 = error */
+  code: number;
+  
+  /** Response message */
+  msg: string;
+  
+  /** Processing time in seconds */
+  processed_time: number;
   
   /** Video data (present on success) */
   data?: {
-    /** Video title or caption text */
+    /** TikTok video ID */
+    aweme_id: string;
+    
+    /** Video ID */
+    id: string;
+    
+    /** Region code */
+    region: string;
+    
+    /** Video title/description */
     title: string;
     
-    /** TikTok username of the video author */
-    author: string;
-    
-    /** URL to video thumbnail/cover image */
+    /** Cover image URL */
     cover: string;
     
-    /** Direct download URL for video without watermark */
-    downloadUrl: string;
+    /** Video duration in seconds */
+    duration: number;
     
-    /** Video duration in seconds (optional) */
-    duration?: number;
+    /** Video URL without watermark */
+    play: string;
     
-    /** Video view count (optional) */
-    views?: number;
+    /** Video URL with watermark */
+    wmplay: string;
+    
+    /** Music/audio URL */
+    music: string;
+    
+    /** Music information */
+    music_info: {
+      id: string;
+      title: string;
+      play: string;
+      cover: string;
+      author: string;
+      original: boolean;
+      duration: number;
+      album: string;
+    };
+    
+    /** Play count */
+    play_count: number;
+    
+    /** Likes count */
+    digg_count: number;
+    
+    /** Comment count */
+    comment_count: number;
+    
+    /** Share count */
+    share_count: number;
+    
+    /** Download count */
+    download_count: number;
+    
+    /** Author information */
+    author: {
+      id: string;
+      unique_id: string;
+      nickname: string;
+      avatar: string;
+    };
+    
+    /** File size in bytes */
+    size: number;
+    
+    /** Creation timestamp */
+    create_time: number;
   };
-  
-  /** Error type (present on error) */
-  error?: string;
-  
-  /** Detailed error message (present on error) */
-  message?: string;
 }
 
 /**

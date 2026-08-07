@@ -68,7 +68,7 @@ A modern, React-based web application for downloading TikTok videos without wate
    d. **Update your `.env` file**:
    ```bash
    VITE_RAPIDAPI_KEY=a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3
-   VITE_RAPIDAPI_HOST=tiktok-video-downloader-no-watermark1.p.rapidapi.com
+   VITE_RAPIDAPI_HOST=tiktok-video-no-watermark2.p.rapidapi.com
    ```
    
    **Replace the placeholder with your actual API key from step (c)!**
@@ -258,7 +258,7 @@ Check your current usage in the RapidAPI dashboard: https://rapidapi.com/develop
 | Variable | Required | Description | Example Value |
 |----------|----------|-------------|---------------|
 | `VITE_RAPIDAPI_KEY` | ✅ Yes | Your RapidAPI authentication key | `abc123xyz456...` |
-| `VITE_RAPIDAPI_HOST` | ✅ Yes | RapidAPI host header for TikTok Downloader API | `tiktok-video-downloader-no-watermark.p.rapidapi.com` |
+| `VITE_RAPIDAPI_HOST` | ✅ Yes | RapidAPI host header for TikTok Downloader API | `tiktok-video-no-watermark2.p.rapidapi.com` |
 | `GEMINI_API_KEY` | ❌ Optional | Gemini AI API key (AI Studio only) | Injected at runtime in AI Studio |
 | `APP_URL` | ❌ Optional | Application URL (AI Studio only) | Injected at runtime in AI Studio |
 
