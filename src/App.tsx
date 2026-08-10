@@ -1,7 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Download, ShieldCheck, Smartphone, Clipboard, Info, Globe, CircleDollarSign, Image, Video, ChevronDown, ChevronUp, Check, Zap, X, Loader2, AlertCircle } from 'lucide-react';
-import { useTikTok } from './hooks/useTikTok';
-import DownloadResult from './components/DownloadResult';
+import { Download, ShieldCheck, Smartphone, Clipboard, Info, Globe, CircleDollarSign, Image, Video, ChevronDown, ChevronUp, Check, Zap, X, Loader2, Play, MessageCircle, ArrowUpRight, RefreshCw } from 'lucide-react';
 
 const LANGUAGES = [
   { code: 'en', flag: '🇺🇸', name: 'English' },
@@ -11,21 +9,21 @@ const LANGUAGES = [
 ];
 
 export default function App() {
-  // TikTok download hook
-  const { 
-    inputUrl, 
-    setInputUrl, 
-    isLoading, 
-    error, 
-    result, 
-    handleDownload: hookHandleDownload, 
-    clearError 
-  } = useTikTok();
-
-  // UI state
+  const [url, setUrl] = useState('');
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [isLangOpen, setIsLangOpen] = useState(false);
   const [activeLang, setActiveLang] = useState('en');
+  const [isLoading, setIsLoading] = useState(false);
+  const [downloadResult, setDownloadResult] = useState<{
+    thumbnail: string;
+    title: string;
+    author: string;
+    avatar: string;
+    views: string;
+    comments: string;
+    shares: string;
+    downloadUrl: string;
+  } | null>(null);
   const langMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -41,24 +39,58 @@ export default function App() {
   const handlePaste = async () => {
     try {
       const text = await navigator.clipboard.readText();
-      setInputUrl(text);
-      // Clear error when user pastes new URL
-      if (error) clearError();
+      setUrl(text);
     } catch (err) {
       console.error('Failed to read clipboard contents: ', err);
     }
   };
 
   const handleClear = () => {
-    setInputUrl('');
-    // Clear error when user clears input
-    if (error) clearError();
+    setUrl('');
+    setDownloadResult(null);
   };
 
   const handleDownload = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!inputUrl) return;
-    await hookHandleDownload();
+    if (!url) return;
+    setIsLoading(true);
+    setDownloadResult(null);
+    
+    try {
+      // Menggunakan endpoint API asli (contoh menggunakan API publik TikWM)
+      // Anda dapat menggantinya dengan endpoint backend Anda sendiri jika diperlukan.
+      const response = await fetch('https://www.tikwm.com/api/?url=' + encodeURIComponent(url));
+      const result = await response.json();
+
+      if (result.code === 0 && result.data) {
+        const videoData = result.data;
+        
+        const formatNumber = (num: number) => {
+          if (!num) return '0';
+          if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+          if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+          return num.toString();
+        };
+
+        setDownloadResult({
+          thumbnail: videoData.cover || videoData.origin_cover,
+          title: videoData.title,
+          author: '@' + (videoData.author?.unique_id || 'user'),
+          avatar: videoData.author?.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&q=80',
+          views: formatNumber(videoData.play_count),
+          comments: formatNumber(videoData.comment_count),
+          shares: formatNumber(videoData.share_count),
+          downloadUrl: videoData.play // URL video tanpa watermark
+        });
+      } else {
+        throw new Error(result.msg || 'Video tidak ditemukan');
+      }
+    } catch (error) {
+      console.error('Error fetching video:', error);
+      alert('Gagal mengambil data video. Pastikan link TikTok valid atau coba lagi nanti.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -127,7 +159,7 @@ export default function App() {
       </header>
 
       {/* Hero Section */}
-      <section className="w-full bg-[#195FD7] px-4 py-8 sm:py-12 flex flex-col items-center justify-center text-center">
+      <section className={`w-full bg-[#195FD7] px-4 py-8 sm:py-12 flex flex-col items-center justify-center text-center ${downloadResult ? 'hidden' : ''}`}>
         <div className="max-w-2xl w-full mx-auto space-y-6">
           
           {/* HEADING & SUBTITLE */}
@@ -148,16 +180,12 @@ export default function App() {
               <input
                 type="text"
                 placeholder="Paste TikTok video link here..."
-                value={inputUrl}
-                onChange={(e) => {
-                  setInputUrl(e.target.value);
-                  // Clear error when user types
-                  if (error) clearError();
-                }}
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
                 required
                 className="w-full h-14 sm:h-16 pl-5 pr-14 rounded-xl text-gray-900 text-sm sm:text-base placeholder-gray-400 bg-white border-2 border-transparent focus:border-[#195FD7]/30 focus:outline-none shadow-lg transition-all"
               />
-              {inputUrl ? (
+              {url ? (
                 <button 
                   type="button" 
                   onClick={handleClear}
@@ -199,38 +227,58 @@ export default function App() {
 
           </form>
 
-          {/* Error Display */}
-          {error && (
-            <div className="w-full max-w-2xl mx-auto mt-4 flex items-start gap-3 bg-red-50 border border-red-200 rounded-lg px-4 py-3">
-              <AlertCircle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" strokeWidth={2} />
-              <div className="flex-1">
-                <p className="text-sm text-red-800 font-medium">{error}</p>
-              </div>
-              <button
-                onClick={clearError}
-                className="p-1 text-red-600 hover:text-red-800 transition-colors"
-                aria-label="Dismiss error"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-          )}
-
-          {/* Download Result */}
-          {result && (
-            <div className="w-full max-w-2xl mx-auto mt-6">
-              <DownloadResult result={result} />
-            </div>
-          )}
-
         </div>
       </section>
 
       {/* Main Content Area */}
-      <main className="flex-1 max-w-5xl mx-auto px-4 sm:px-6 w-full py-12 sm:py-16 space-y-16 sm:space-y-24">
+      <main className="flex-1 max-w-5xl mx-auto px-4 sm:px-6 w-full py-12 sm:py-16">
         
-        {/* Info Card */}
-        <section className="bg-white rounded-xl p-6 sm:p-10 shadow-sm border border-gray-200 text-center">
+        {/* Download Result */}
+        {downloadResult && (
+          <section className="bg-white rounded-2xl shadow-[0px_4px_24px_rgba(0,0,0,0.06)] p-5 sm:p-6 mb-8 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-lg mx-auto">
+            <div className="flex flex-col gap-6">
+              {/* Header Info */}
+              <div className="flex flex-row gap-4">
+                {/* Thumbnail */}
+                <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
+                   <img src={downloadResult.thumbnail} alt="Video Thumbnail" className="w-full h-full object-cover" />
+                   <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
+                       <div className="w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center">
+                           <Play className="w-5 h-5 text-gray-900 ml-1" fill="currentColor" />
+                       </div>
+                   </div>
+                </div>
+                {/* Text Info */}
+                <div className="flex flex-col flex-1 justify-center">
+                  <h3 className="font-semibold text-[15px] sm:text-[16px] text-[#121212] line-clamp-2 leading-[22px] mb-2">{downloadResult.title}</h3>
+                  <div className="flex items-center gap-2 mb-2.5">
+                      <img src={downloadResult.avatar} alt="Author Avatar" className="w-5 h-5 rounded-full object-cover" />
+                      <p className="text-[14px] text-[#5B6475]">{downloadResult.author}</p>
+                  </div>
+                  <div className="flex items-center gap-3.5 text-[13px] text-[#5B6475]">
+                      <span className="flex items-center gap-1"><Play className="w-3.5 h-3.5" fill="currentColor" /> {downloadResult.views}</span>
+                      <span className="flex items-center gap-1"><MessageCircle className="w-3.5 h-3.5" /> {downloadResult.comments}</span>
+                      <span className="flex items-center gap-1"><ArrowUpRight className="w-4 h-4" /> {downloadResult.shares}</span>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Action Buttons */}
+              <div className="flex flex-col gap-3 mt-2">
+                 <a href={downloadResult.downloadUrl} className="w-full flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-[#195FD7] text-white font-semibold text-[16px] hover:bg-[#0F4EC0] transition-colors shadow-sm">
+                    <Download className="w-5 h-5" /> Download Video
+                 </a>
+                 <button onClick={handleClear} className="w-full flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-transparent text-[#5B6475] hover:text-[#121212] font-semibold text-[15px] transition-colors">
+                    <RefreshCw className="w-5 h-5" /> Download Another Video
+                 </button>
+              </div>
+            </div>
+          </section>
+        )}
+
+        <div className={downloadResult ? 'hidden' : 'space-y-16 sm:space-y-24'}>
+          {/* Info Card */}
+          <section className="bg-white rounded-xl p-6 sm:p-10 shadow-sm border border-gray-200 text-center">
           <div className="flex flex-col items-center">
             {/* Info Icon */}
             <div className="w-12 h-12 bg-[#EBF2FF] rounded-xl flex items-center justify-center mb-6">
@@ -478,6 +526,7 @@ export default function App() {
             ))}
           </div>
         </section>
+        </div>
       </main>
 
       {/* Footer */}
@@ -527,9 +576,9 @@ export default function App() {
           </div>
 
           <div className="border-t border-gray-100 pt-8 flex flex-col items-center text-center gap-1.5">
-            <p className="text-gray-500 text-[15px]">© 2019 - 2026 TikFlow. All rights reserved.</p>
+            <p className="text-gray-500 text-[15px]">© 2026 TikFlow. All rights reserved.</p>
             <p className="text-gray-400 text-sm">This service is not affiliated with TikTok or ByteDance.</p>
-            <p className="text-gray-400 text-[13px] mt-1">v19.1</p>
+            <p className="text-gray-400 text-[13px] mt-1">by prstyaDev</p>
           </div>
         </div>
       </footer>

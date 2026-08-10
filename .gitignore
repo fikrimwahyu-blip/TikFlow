@@ -1,36 +1,13 @@
-# Kiro CLI & Multi-Agent Artifacts
-.kiro/
-*.md
-!README.md
-!SETUP-ENV.md
-!QUICK-FIX.md
-!ENV-SETUP-FLOWCHART.md
-
-# Logs & Environment Variables
-*.log
-.env
-.env.local
-.env.*.local
-
-# Dependencies
 node_modules/
-.pnpm-store/
-
-# Production / Build Output
-dist/
-dist-ssr/
 build/
-*.local
-
-# Editor & System Files
-.vscode/
-!.vscode/extensions.json
-.idea/
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+dist/
+coverage/
 .DS_Store
-Thumbs.db
-
+*.log
+.env*
+!.env.example
+mock/
+mocks/
+__mocks__/
+*.mock.js
+*.mock.ts

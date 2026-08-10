@@ -1,3 +1,0 @@
-User-agent: *
-Allow: /
-Sitemap: https://tikflow-prstyadev.vercel.app/sitemap.xml
