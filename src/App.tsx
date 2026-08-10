@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Download, ShieldCheck, Smartphone, Clipboard, Info, Globe, CircleDollarSign, Image, Video, ChevronDown, ChevronUp, Check, Zap, X, Loader2, Play, MessageCircle, ArrowUpRight, RefreshCw } from 'lucide-react';
 import JSZip from 'jszip';
+import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
 
 const LANGUAGES = [
   { code: 'en', flag: '🇺🇸', name: 'English' },
@@ -9,7 +10,77 @@ const LANGUAGES = [
   { code: 'fr', flag: '🇫🇷', name: 'Français' },
 ];
 
-export default function App() {
+const pageConfigs = {
+  '/': {
+    title: 'Tiktok Video Downloader',
+    subtitle: 'Free TikTok Downloader - No watermark, HD quality, works on all devices',
+    placeholder: 'Paste TikTok link here',
+    pageTitle: 'TikFlow - TikTok Video Downloader'
+  },
+  '/douyin-downloader': {
+    title: 'Douyin Video Downloader',
+    subtitle: 'Download Douyin videos without watermark',
+    placeholder: 'Paste Douyin video link here...',
+    pageTitle: 'Douyin Video Downloader - TikFlow'
+  },
+  '/tiktok-slide-downloader': {
+    title: 'TikTok Slideshow Downloader',
+    subtitle: 'Download TikTok slideshows and photos without watermarks',
+    placeholder: 'Paste TikTok slideshow link here...',
+    pageTitle: 'TikTok Slideshow Downloader - TikFlow'
+  },
+  '/tiktok-story-downloader': {
+    title: 'Download TikTok Stories',
+    subtitle: 'Free TikTok Story Downloader - No watermark, HD quality',
+    placeholder: 'Paste TikTok story link here...',
+    pageTitle: 'TikTok Story Downloader - TikFlow'
+  }
+};
+
+function RouteTransition() {
+  const { pathname } = useLocation();
+  const [progress, setProgress] = useState(0);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+    
+    setVisible(true);
+    setProgress(30);
+
+    const timer1 = setTimeout(() => setProgress(70), 100);
+    const timer2 = setTimeout(() => setProgress(100), 300);
+    const timer3 = setTimeout(() => {
+      setVisible(false);
+      setTimeout(() => setProgress(0), 300);
+    }, 500);
+
+    return () => {
+      clearTimeout(timer1);
+      clearTimeout(timer2);
+      clearTimeout(timer3);
+    };
+  }, [pathname]);
+
+  return (
+    <div
+      className="fixed top-0 left-0 h-1 bg-[#195FD7] z-[100] transition-all duration-300 ease-out"
+      style={{ 
+        width: `${progress}%`,
+        opacity: visible ? 1 : 0
+      }}
+    />
+  );
+}
+
+function Downloader() {
+  const location = useLocation();
+  const config = pageConfigs[location.pathname as keyof typeof pageConfigs] || pageConfigs['/'];
+
+  useEffect(() => {
+    document.title = config.pageTitle;
+  }, [config.pageTitle]);
+
   const [url, setUrl] = useState('');
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [isLangOpen, setIsLangOpen] = useState(false);
@@ -173,13 +244,13 @@ export default function App() {
           
           {/* LOGO & Install App */}
           <div className="flex items-center gap-3 sm:gap-6">
-            <a href="#" className="text-2xl sm:text-3xl font-extrabold tracking-tight flex items-center gap-1">
+            <Link to="/" className="text-2xl sm:text-3xl font-extrabold tracking-tight flex items-center gap-1">
               <Zap className="w-6 h-6 sm:w-7 sm:h-7 text-[#195FD7]" fill="currentColor" />
               <div className="flex items-center">
                 <span className="text-slate-900">Tik</span>
                 <span className="text-[#195FD7]">Flow</span>
               </div>
-            </a>
+            </Link>
             
             <a
               href="#"
@@ -237,10 +308,10 @@ export default function App() {
           {/* HEADING & SUBTITLE */}
           <div className="space-y-3 sm:space-y-4">
             <h1 className="text-[26px] sm:text-3xl md:text-4xl font-bold text-white tracking-tight">
-              Tiktok Video Downloader
+              {config.title}
             </h1>
             <p className="text-[15px] sm:text-base text-white font-normal max-w-xl mx-auto px-2">
-              Free TikTok Downloader - No watermark, HD quality, works on all devices
+              {config.subtitle}
             </p>
           </div>
 
@@ -251,7 +322,7 @@ export default function App() {
             <div className="relative flex-1">
               <input
                 type="text"
-                placeholder="Paste TikTok video link here..."
+                placeholder={config.placeholder}
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
                 required
@@ -673,13 +744,13 @@ export default function App() {
           <div className="flex flex-col md:flex-row justify-between gap-10 md:gap-16 mb-10">
             {/* Logo and Intro */}
             <div className="max-w-sm">
-              <a href="#" className="text-2xl sm:text-3xl font-extrabold tracking-tight flex items-center gap-1 mb-4">
+              <Link to="/" className="text-2xl sm:text-3xl font-extrabold tracking-tight flex items-center gap-1 mb-4">
                 <Zap className="w-6 h-6 sm:w-7 sm:h-7 text-[#195FD7]" fill="currentColor" />
                 <div className="flex items-center">
                   <span className="text-slate-900">Tik</span>
                   <span className="text-[#195FD7]">Flow</span>
                 </div>
-              </a>
+              </Link>
               <p className="text-gray-600 text-sm leading-relaxed">
                 The fastest and easiest way to download TikTok videos without watermark.
               </p>
@@ -689,26 +760,26 @@ export default function App() {
               {/* Quick Links */}
               <div className="flex flex-col gap-4">
                 <h4 className="font-bold text-gray-900 text-[15px]">Quick Links</h4>
-                <a href="#" className="text-gray-600 hover:text-gray-900 text-[15px] transition-colors">Home</a>
-                <a href="#" className="text-gray-600 hover:text-gray-900 text-[15px] transition-colors">How to Download TikTok</a>
+                <Link to="/" className="text-gray-600 hover:text-gray-900 text-[15px] transition-colors">Home</Link>
+                <Link to="/" className="text-gray-600 hover:text-gray-900 text-[15px] transition-colors">How to Download TikTok</Link>
               </div>
 
               {/* Tools */}
               <div className="flex flex-col gap-4">
                 <h4 className="font-bold text-gray-900 text-[15px]">Tools</h4>
-                <a href="#" className="text-gray-600 hover:text-gray-900 text-[15px] transition-colors">TikTok Notes Downloader</a>
-                <a href="#" className="text-gray-600 hover:text-gray-900 text-[15px] transition-colors">Douyin Downloader</a>
-                <a href="#" className="text-gray-600 hover:text-gray-900 text-[15px] transition-colors">TikTok Slide Downloader</a>
-                <a href="#" className="text-gray-600 hover:text-gray-900 text-[15px] transition-colors">TikTok Story Downloader</a>
+                <Link to="/" className="text-gray-600 hover:text-gray-900 text-[15px] transition-colors">TikTok Notes Downloader</Link>
+                <Link to="/douyin-downloader" className="text-gray-600 hover:text-gray-900 text-[15px] transition-colors">Douyin Downloader</Link>
+                <Link to="/tiktok-slide-downloader" className="text-gray-600 hover:text-gray-900 text-[15px] transition-colors">TikTok Slide Downloader</Link>
+                <Link to="/tiktok-story-downloader" className="text-gray-600 hover:text-gray-900 text-[15px] transition-colors">TikTok Story Downloader</Link>
               </div>
 
               {/* Legal */}
               <div className="flex flex-col gap-4">
                 <h4 className="font-bold text-gray-900 text-[15px]">Legal</h4>
-                <a href="#" className="text-gray-600 hover:text-gray-900 text-[15px] transition-colors">Privacy Policy</a>
-                <a href="#" className="text-gray-600 hover:text-gray-900 text-[15px] transition-colors">Terms of Service</a>
-                <a href="#" className="text-gray-600 hover:text-gray-900 text-[15px] transition-colors">Cookie Policy</a>
-                <a href="#" className="text-gray-600 hover:text-gray-900 text-[15px] transition-colors">Contact</a>
+                <Link to="/" className="text-gray-600 hover:text-gray-900 text-[15px] transition-colors">Privacy Policy</Link>
+                <Link to="/" className="text-gray-600 hover:text-gray-900 text-[15px] transition-colors">Terms of Service</Link>
+                <Link to="/" className="text-gray-600 hover:text-gray-900 text-[15px] transition-colors">Cookie Policy</Link>
+                <Link to="/" className="text-gray-600 hover:text-gray-900 text-[15px] transition-colors">Contact</Link>
               </div>
             </div>
           </div>
@@ -721,5 +792,16 @@ export default function App() {
         </div>
       </footer>
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <RouteTransition />
+      <Routes>
+        <Route path="/*" element={<Downloader />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
