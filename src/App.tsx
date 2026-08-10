@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Download, ShieldCheck, Smartphone, Clipboard, Info, Globe, CircleDollarSign, Image, Video, ChevronDown, ChevronUp, Check, Zap, X, Loader2, Play, MessageCircle, ArrowUpRight, RefreshCw } from 'lucide-react';
+import JSZip from 'jszip';
 
 const LANGUAGES = [
   { code: 'en', flag: '🇺🇸', name: 'English' },
@@ -14,8 +15,10 @@ export default function App() {
   const [isLangOpen, setIsLangOpen] = useState(false);
   const [activeLang, setActiveLang] = useState('en');
   const [isLoading, setIsLoading] = useState(false);
-  const [isDownloadingFile, setIsDownloadingFile] = useState(false);
+  const [downloadingUrl, setDownloadingUrl] = useState<string | null>(null);
+  const [isDownloadingZip, setIsDownloadingZip] = useState(false);
   const [downloadResult, setDownloadResult] = useState<{
+    type: 'video' | 'image';
     thumbnail: string;
     title: string;
     author: string;
@@ -23,7 +26,9 @@ export default function App() {
     views: string;
     comments: string;
     shares: string;
-    downloadUrl: string;
+    downloadUrl?: string;
+    images?: string[];
+    musicUrl?: string;
   } | null>(null);
   const langMenuRef = useRef<HTMLDivElement>(null);
 
@@ -49,6 +54,7 @@ export default function App() {
   const handleClear = () => {
     setUrl('');
     setDownloadResult(null);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleDownload = async (e: React.FormEvent) => {
@@ -73,7 +79,10 @@ export default function App() {
           return num.toString();
         };
 
+        const isImage = videoData.images && videoData.images.length > 0;
+
         setDownloadResult({
+          type: isImage ? 'image' : 'video',
           thumbnail: videoData.cover || videoData.origin_cover,
           title: videoData.title,
           author: '@' + (videoData.author?.unique_id || 'user'),
@@ -81,7 +90,9 @@ export default function App() {
           views: formatNumber(videoData.play_count),
           comments: formatNumber(videoData.comment_count),
           shares: formatNumber(videoData.share_count),
-          downloadUrl: videoData.play // URL video tanpa watermark
+          downloadUrl: videoData.play, // URL video tanpa watermark
+          images: videoData.images,
+          musicUrl: videoData.music || videoData.music_info?.play
         });
       } else {
         throw new Error(result.msg || 'Video tidak ditemukan');
@@ -96,23 +107,61 @@ export default function App() {
 
   const handleDownloadFile = async (videoUrl: string) => {
     try {
-      setIsDownloadingFile(true);
+      setDownloadingUrl(videoUrl);
       const response = await fetch(videoUrl);
       const blob = await response.blob();
       const blobUrl = URL.createObjectURL(blob);
       
       const link = document.createElement('a');
       link.href = blobUrl;
-      link.download = 'tiktok-video.mp4';
+      link.download = videoUrl.includes('.mp3') ? 'tiktok-audio.mp3' : (videoUrl.includes('.jpeg') || videoUrl.includes('.jpg') || videoUrl.includes('.webp') || videoUrl.includes('.png') ? 'tiktok-image.jpg' : 'tiktok-video.mp4');
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(blobUrl);
     } catch (error) {
       console.error('Download failed:', error);
-      alert('Gagal mengunduh video secara langsung (CORS atau network error). Silakan klik kanan/tekan lama video dan pilih "Download" atau "Save video as".');
+      alert('Gagal mengunduh file secara langsung (CORS atau network error). Silakan klik kanan/tekan lama video dan pilih "Download" atau "Save as".');
     } finally {
-      setIsDownloadingFile(false);
+      setDownloadingUrl(null);
+    }
+  };
+
+  const handleDownloadZip = async () => {
+    if (!downloadResult || !downloadResult.images || downloadResult.images.length === 0) return;
+    
+    try {
+      setIsDownloadingZip(true);
+      const zip = new JSZip();
+      
+      const imagePromises = downloadResult.images.map(async (imgUrl, index) => {
+        try {
+          const response = await fetch(imgUrl);
+          const blob = await response.blob();
+          const extension = imgUrl.split('?')[0].split('.').pop() || 'jpg';
+          zip.file(`slide-${index + 1}.${extension}`, blob);
+        } catch (error) {
+          console.error(`Failed to fetch image ${index + 1}:`, error);
+        }
+      });
+      
+      await Promise.all(imagePromises);
+      
+      const content = await zip.generateAsync({ type: 'blob' });
+      const blobUrl = URL.createObjectURL(content);
+      
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = 'tiktok-slides.zip';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error('ZIP creation failed:', error);
+      alert('Gagal membuat file ZIP. Silakan coba download gambar satu per satu.');
+    } finally {
+      setIsDownloadingZip(false);
     }
   };
 
@@ -287,22 +336,80 @@ export default function App() {
               </div>
               
               {/* Action Buttons */}
-              <div className="flex flex-col gap-3 mt-2">
-                 <button 
-                   onClick={() => handleDownloadFile(downloadResult.downloadUrl)}
-                   disabled={isDownloadingFile}
-                   className="w-full flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-[#195FD7] text-white font-semibold text-[16px] hover:bg-[#0F4EC0] transition-colors shadow-sm disabled:opacity-70 disabled:cursor-not-allowed"
-                 >
-                    {isDownloadingFile ? (
-                      <><Loader2 className="w-5 h-5 animate-spin" /> Downloading...</>
-                    ) : (
-                      <><Download className="w-5 h-5" /> Download Video</>
-                    )}
-                 </button>
-                 <button onClick={handleClear} className="w-full flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-transparent text-[#5B6475] hover:text-[#121212] font-semibold text-[15px] transition-colors">
-                    <RefreshCw className="w-5 h-5" /> Download Another Video
-                 </button>
-              </div>
+              {downloadResult.type === 'video' && downloadResult.downloadUrl && (
+                <div className="flex flex-col gap-3 mt-2">
+                   <button 
+                     onClick={() => handleDownloadFile(downloadResult.downloadUrl!)}
+                     disabled={downloadingUrl === downloadResult.downloadUrl}
+                     className="w-full flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-[#195FD7] text-white font-semibold text-[16px] hover:bg-[#0F4EC0] transition-colors shadow-sm disabled:opacity-70 disabled:cursor-not-allowed"
+                   >
+                      {downloadingUrl === downloadResult.downloadUrl ? (
+                        <><Loader2 className="w-5 h-5 animate-spin" /> Downloading...</>
+                      ) : (
+                        <><Download className="w-5 h-5" /> Download Video</>
+                      )}
+                   </button>
+                   <button onClick={handleClear} className="w-full flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-transparent text-[#5B6475] hover:text-[#121212] font-semibold text-[15px] transition-colors">
+                      <RefreshCw className="w-5 h-5" /> Download Another Video
+                   </button>
+                </div>
+              )}
+
+              {downloadResult.type === 'image' && downloadResult.images && (
+                <>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 mt-4">
+                    {downloadResult.images.map((img, idx) => (
+                      <div key={idx} className="flex flex-col gap-2">
+                        <div className="relative rounded-xl overflow-hidden aspect-[3/4] bg-gray-100 border border-gray-200">
+                           <img src={img} alt={`Slide ${idx + 1}`} className="w-full h-full object-cover" />
+                           <div className="absolute top-2 left-2 bg-black/60 text-white text-xs px-2 py-1 rounded-md font-medium backdrop-blur-sm">
+                             {idx + 1}
+                           </div>
+                        </div>
+                        <button 
+                          onClick={() => handleDownloadFile(img)}
+                          disabled={downloadingUrl === img}
+                          className="w-full flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg bg-[#195FD7] text-white font-semibold text-[13px] sm:text-[14px] hover:bg-[#0F4EC0] transition-colors shadow-sm disabled:opacity-70 disabled:cursor-not-allowed"
+                        >
+                          {downloadingUrl === img ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />} Download
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="flex flex-col gap-3 mt-6 pt-6 border-t border-gray-100">
+                     <button 
+                       onClick={handleDownloadZip}
+                       disabled={isDownloadingZip}
+                       className="w-full flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-transparent border-2 border-dashed border-gray-300 text-gray-700 font-semibold text-[16px] hover:bg-gray-50 hover:border-gray-400 transition-colors shadow-sm disabled:opacity-70 disabled:cursor-not-allowed"
+                     >
+                        {isDownloadingZip ? (
+                          <><Loader2 className="w-5 h-5 animate-spin" /> Creating ZIP...</>
+                        ) : (
+                          <><Download className="w-5 h-5" /> Download All (ZIP) ({downloadResult.images.length})</>
+                        )}
+                     </button>
+                     
+                     {downloadResult.downloadUrl && (
+                       <button 
+                         onClick={() => handleDownloadFile(downloadResult.downloadUrl!)}
+                         disabled={downloadingUrl === downloadResult.downloadUrl}
+                         className="w-full flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-[#195FD7] text-white font-semibold text-[16px] hover:bg-[#0F4EC0] transition-colors shadow-sm disabled:opacity-70 disabled:cursor-not-allowed"
+                       >
+                          {downloadingUrl === downloadResult.downloadUrl ? (
+                            <><Loader2 className="w-5 h-5 animate-spin" /> Downloading...</>
+                          ) : (
+                            <><Download className="w-5 h-5" /> Download Slideshow</>
+                          )}
+                       </button>
+                     )}
+                     
+                     <button onClick={handleClear} className="w-full flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-transparent text-[#5B6475] hover:text-[#121212] font-semibold text-[15px] transition-colors">
+                        <RefreshCw className="w-5 h-5" /> Download Another Video
+                     </button>
+                  </div>
+                </>
+              )}
             </div>
           </section>
         )}
