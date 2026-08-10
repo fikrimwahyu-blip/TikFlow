@@ -14,6 +14,7 @@ export default function App() {
   const [isLangOpen, setIsLangOpen] = useState(false);
   const [activeLang, setActiveLang] = useState('en');
   const [isLoading, setIsLoading] = useState(false);
+  const [isDownloadingFile, setIsDownloadingFile] = useState(false);
   const [downloadResult, setDownloadResult] = useState<{
     thumbnail: string;
     title: string;
@@ -90,6 +91,28 @@ export default function App() {
       alert('Gagal mengambil data video. Pastikan link TikTok valid atau coba lagi nanti.');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleDownloadFile = async (videoUrl: string) => {
+    try {
+      setIsDownloadingFile(true);
+      const response = await fetch(videoUrl);
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = 'tiktok-video.mp4';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error('Download failed:', error);
+      alert('Gagal mengunduh video secara langsung (CORS atau network error). Silakan klik kanan/tekan lama video dan pilih "Download" atau "Save video as".');
+    } finally {
+      setIsDownloadingFile(false);
     }
   };
 
@@ -231,11 +254,11 @@ export default function App() {
       </section>
 
       {/* Main Content Area */}
-      <main className="flex-1 max-w-5xl mx-auto px-4 sm:px-6 w-full py-12 sm:py-16">
+      <main className={`flex-1 max-w-5xl mx-auto px-4 sm:px-6 w-full ${downloadResult ? 'pt-8 pb-4' : 'py-12 sm:py-16'}`}>
         
         {/* Download Result */}
         {downloadResult && (
-          <section className="bg-white rounded-2xl shadow-[0px_4px_24px_rgba(0,0,0,0.06)] p-5 sm:p-6 mb-8 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-lg mx-auto">
+          <section className="bg-white rounded-2xl shadow-[0px_4px_24px_rgba(0,0,0,0.06)] p-5 sm:p-6 mb-4 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-lg mx-auto">
             <div className="flex flex-col gap-6">
               {/* Header Info */}
               <div className="flex flex-row gap-4">
@@ -265,9 +288,17 @@ export default function App() {
               
               {/* Action Buttons */}
               <div className="flex flex-col gap-3 mt-2">
-                 <a href={downloadResult.downloadUrl} className="w-full flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-[#195FD7] text-white font-semibold text-[16px] hover:bg-[#0F4EC0] transition-colors shadow-sm">
-                    <Download className="w-5 h-5" /> Download Video
-                 </a>
+                 <button 
+                   onClick={() => handleDownloadFile(downloadResult.downloadUrl)}
+                   disabled={isDownloadingFile}
+                   className="w-full flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-[#195FD7] text-white font-semibold text-[16px] hover:bg-[#0F4EC0] transition-colors shadow-sm disabled:opacity-70 disabled:cursor-not-allowed"
+                 >
+                    {isDownloadingFile ? (
+                      <><Loader2 className="w-5 h-5 animate-spin" /> Downloading...</>
+                    ) : (
+                      <><Download className="w-5 h-5" /> Download Video</>
+                    )}
+                 </button>
                  <button onClick={handleClear} className="w-full flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-transparent text-[#5B6475] hover:text-[#121212] font-semibold text-[15px] transition-colors">
                     <RefreshCw className="w-5 h-5" /> Download Another Video
                  </button>
@@ -530,7 +561,7 @@ export default function App() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-gray-50 mt-12 sm:mt-16 py-8 sm:py-12 border-t border-gray-200">
+      <footer className={`bg-gray-50 py-8 sm:py-12 border-t border-gray-200 ${downloadResult ? 'mt-4' : 'mt-12 sm:mt-16'}`}>
         <div className="max-w-5xl mx-auto px-4 sm:px-6">
           <div className="flex flex-col md:flex-row justify-between gap-10 md:gap-16 mb-10">
             {/* Logo and Intro */}
