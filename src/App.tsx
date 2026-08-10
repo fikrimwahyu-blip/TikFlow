@@ -10,6 +10,21 @@ const LANGUAGES = [
   { code: 'fr', flag: '🇫🇷', name: 'Français' },
 ];
 
+function Logo({ className = "w-6 h-6 sm:w-7 sm:h-7" }: { className?: string }) {
+  return (
+    <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+      <defs>
+        <linearGradient id="logo-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#3b82f6" />
+          <stop offset="100%" stopColor="#195FD7" />
+        </linearGradient>
+      </defs>
+      <rect width="100" height="100" rx="24" fill="url(#logo-grad)" />
+      <path d="M56 24 L32 54 H48 L40 76 L68 44 H52 Z" fill="#ffffff" stroke="#ffffff" strokeWidth="6" strokeLinejoin="round" strokeLinecap="round"/>
+    </svg>
+  );
+}
+
 const pageConfigs = {
   '/': {
     title: 'Tiktok Video Downloader',
@@ -245,7 +260,7 @@ function Downloader() {
           {/* LOGO & Install App */}
           <div className="flex items-center gap-3 sm:gap-6">
             <Link to="/" className="text-2xl sm:text-3xl font-extrabold tracking-tight flex items-center gap-1">
-              <Zap className="w-6 h-6 sm:w-7 sm:h-7 text-[#195FD7]" fill="currentColor" />
+              <Logo />
               <div className="flex items-center">
                 <span className="text-slate-900">Tik</span>
                 <span className="text-[#195FD7]">Flow</span>
@@ -745,7 +760,7 @@ function Downloader() {
             {/* Logo and Intro */}
             <div className="max-w-sm">
               <Link to="/" className="text-2xl sm:text-3xl font-extrabold tracking-tight flex items-center gap-1 mb-4">
-                <Zap className="w-6 h-6 sm:w-7 sm:h-7 text-[#195FD7]" fill="currentColor" />
+                <Logo />
                 <div className="flex items-center">
                   <span className="text-slate-900">Tik</span>
                   <span className="text-[#195FD7]">Flow</span>
