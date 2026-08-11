@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Download, ShieldCheck, Smartphone, Clipboard, Info, Globe, CircleDollarSign, Image, Video, ChevronDown, ChevronUp, Check, Zap, X, Loader2, Play, MessageCircle, ArrowUpRight, RefreshCw } from 'lucide-react';
 import JSZip from 'jszip';
 import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
+import SEO from './components/SEO';
+import { seoConfigs } from './config/seoConfig';
 
 const LANGUAGES = [
   { code: 'en', flag: '🇺🇸', name: 'English' },
@@ -91,6 +93,7 @@ function RouteTransition() {
 function Downloader() {
   const location = useLocation();
   const config = pageConfigs[location.pathname as keyof typeof pageConfigs] || pageConfigs['/'];
+  const seoConfig = seoConfigs[location.pathname as keyof typeof seoConfigs] || seoConfigs['/'];
 
   useEffect(() => {
     document.title = config.pageTitle;
@@ -253,6 +256,14 @@ function Downloader() {
 
   return (
     <div className="min-h-screen bg-white font-sans flex flex-col">
+      {/* SEO Component */}
+      <SEO 
+        title={seoConfig.title}
+        description={seoConfig.description}
+        keywords={seoConfig.keywords}
+        canonical={seoConfig.canonical}
+      />
+      
       {/* Navigation */}
       <header className="w-full bg-white border-b border-gray-200 sticky top-0 z-50">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 h-14 sm:h-16 flex items-center justify-between">
