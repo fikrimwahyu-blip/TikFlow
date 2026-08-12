@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Download, ShieldCheck, Smartphone, Clipboard, Info, Globe, CircleDollarSign, Image, Video, ChevronDown, ChevronUp, Check, Zap, X, Loader2, Play, MessageCircle, ArrowUpRight, RefreshCw, Share2 } from 'lucide-react';
+import { Download, ShieldCheck, Smartphone, Clipboard, ClipboardPaste, Info, Globe, CircleDollarSign, Image, Video, ChevronDown, ChevronUp, Check, Zap, X, Loader2, Play, MessageCircle, ArrowUpRight, RefreshCw } from 'lucide-react';
 import JSZip from 'jszip';
 import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
 
@@ -167,6 +167,7 @@ function Downloader() {
     downloadUrl?: string;
     images?: string[];
     musicUrl?: string;
+    videoId?: string;
   } | null>(null);
   const langMenuRef = useRef<HTMLDivElement>(null);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
@@ -257,7 +258,8 @@ function Downloader() {
           shares: formatNumber(videoData.share_count),
           downloadUrl: videoData.play, // URL video tanpa watermark
           images: videoData.images,
-          musicUrl: videoData.music || videoData.music_info?.play
+          musicUrl: videoData.music || videoData.music_info?.play,
+          videoId: videoData.id
         });
       } else {
         throw new Error(result.msg || 'Video tidak ditemukan');
@@ -279,7 +281,23 @@ function Downloader() {
       
       const link = document.createElement('a');
       link.href = blobUrl;
-      link.download = videoUrl.includes('.mp3') ? 'tiktok-audio.mp3' : (videoUrl.includes('.jpeg') || videoUrl.includes('.jpg') || videoUrl.includes('.webp') || videoUrl.includes('.png') ? 'tiktok-image.jpg' : 'tiktok-video.mp4');
+      
+      // Generate dynamic filename
+      const timestamp = Date.now();
+      const authorId = downloadResult?.author?.replace('@', '') || 'video';
+      const videoId = downloadResult?.videoId || timestamp;
+      
+      let filename = `TikFlow_${authorId}_${videoId}`;
+      
+      if (videoUrl.includes('.mp3')) {
+        filename += '.mp3';
+      } else if (videoUrl.match(/\.(jpeg|jpg|webp|png)/i)) {
+        filename += '.jpg';
+      } else {
+        filename += '.mp4';
+      }
+      
+      link.download = filename;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -317,7 +335,12 @@ function Downloader() {
       
       const link = document.createElement('a');
       link.href = blobUrl;
-      link.download = 'tiktok-slides.zip';
+      
+      const timestamp = Date.now();
+      const authorId = downloadResult?.author?.replace('@', '') || 'video';
+      const videoId = downloadResult?.videoId || timestamp;
+      
+      link.download = `TikFlow_${authorId}_${videoId}_slides.zip`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -444,7 +467,7 @@ function Downloader() {
                   aria-label="Paste link"
                   className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-gray-400 hover:text-gray-900 transition-colors bg-gray-50 hover:bg-gray-100 rounded-lg"
                 >
-                  <Clipboard className="w-5 h-5" />
+                  <ClipboardPaste className="w-5 h-5" />
                 </button>
               )}
             </div>
@@ -523,14 +546,6 @@ function Downloader() {
                    <button onClick={handleClear} className="w-full flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-transparent text-[#5B6475] hover:text-[#121212] font-semibold text-[15px] transition-colors">
                       <RefreshCw className="w-5 h-5" /> Download Another Video
                    </button>
-                   {navigator.share && (
-                     <button
-                       onClick={() => navigator.share({ title: 'Download via TikFlow', text: 'Check this out!', url: downloadResult.downloadUrl })}
-                       className="w-full flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-transparent border border-gray-300 text-gray-700 font-semibold text-[16px] hover:bg-gray-50 transition-colors"
-                     >
-                        <Share2 className="w-5 h-5" /> Share Link
-                     </button>
-                   )}
                 </div>
               )}
 
@@ -586,14 +601,6 @@ function Downloader() {
                      <button onClick={handleClear} className="w-full flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-transparent text-[#5B6475] hover:text-[#121212] font-semibold text-[15px] transition-colors">
                         <RefreshCw className="w-5 h-5" /> Download Another Video
                      </button>
-                     {navigator.share && downloadResult.downloadUrl && (
-                       <button
-                         onClick={() => navigator.share({ title: 'Download via TikFlow', text: 'Check this out!', url: downloadResult.downloadUrl })}
-                         className="w-full flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-transparent border border-gray-300 text-gray-700 font-semibold text-[16px] hover:bg-gray-50 transition-colors mt-2"
-                       >
-                          <Share2 className="w-5 h-5" /> Share Link
-                       </button>
-                     )}
                   </div>
                 </>
               )}
