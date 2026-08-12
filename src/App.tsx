@@ -97,6 +97,30 @@ function Downloader() {
   }, [config.pageTitle]);
 
   const [url, setUrl] = useState('');
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  
+  useEffect(() => {
+    // Handle offline status
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    // Handle Share Target API (read URL params)
+    const params = new URLSearchParams(window.location.search);
+    const sharedUrl = params.get('url') || params.get('text');
+    if (sharedUrl) {
+      setUrl(sharedUrl);
+      // Clean up URL so it doesn't stay in the address bar
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [isLangOpen, setIsLangOpen] = useState(false);
   const [activeLang, setActiveLang] = useState('en');
@@ -280,6 +304,11 @@ function Downloader() {
 
   return (
     <div className="min-h-screen bg-white font-sans flex flex-col">
+      {!isOnline && (
+        <div className="bg-red-500 text-white text-center py-2 text-sm font-medium z-[100] relative">
+          Anda sedang offline. Silakan periksa koneksi internet Anda.
+        </div>
+      )}
       {/* Navigation */}
       <header className="w-full bg-white border-b border-gray-200 sticky top-0 z-50">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 h-14 sm:h-16 flex items-center justify-between">

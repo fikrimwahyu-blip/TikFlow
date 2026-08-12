@@ -1,6 +1,7 @@
 {
-  "name": "TikFlow - TikTok Downloader",
+  "name": "TikFlow",
   "short_name": "TikFlow",
+  "description": "by prstyaDev",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#2563eb",
@@ -18,5 +19,14 @@
       "type": "image/svg+xml",
       "purpose": "any maskable"
     }
-  ]
+  ],
+  "share_target": {
+    "action": "/",
+    "method": "GET",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  }
 }
