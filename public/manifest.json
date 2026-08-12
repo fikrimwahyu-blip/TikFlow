@@ -28,5 +28,19 @@
       "text": "text",
       "url": "url"
     }
-  }
+  },
+  "shortcuts": [
+    {
+      "name": "Video Downloader",
+      "url": "/"
+    },
+    {
+      "name": "Slide Downloader",
+      "url": "/tiktok-slide-downloader"
+    },
+    {
+      "name": "Douyin Downloader",
+      "url": "/douyin-downloader"
+    }
+  ]
 }

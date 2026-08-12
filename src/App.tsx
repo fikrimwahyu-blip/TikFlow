@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Download, ShieldCheck, Smartphone, Clipboard, Info, Globe, CircleDollarSign, Image, Video, ChevronDown, ChevronUp, Check, Zap, X, Loader2, Play, MessageCircle, ArrowUpRight, RefreshCw } from 'lucide-react';
+import { Download, ShieldCheck, Smartphone, Clipboard, Info, Globe, CircleDollarSign, Image, Video, ChevronDown, ChevronUp, Check, Zap, X, Loader2, Play, MessageCircle, ArrowUpRight, RefreshCw, Share2 } from 'lucide-react';
 import JSZip from 'jszip';
 import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
 
@@ -118,6 +118,32 @@ function Downloader() {
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleFocus = async () => {
+      try {
+        const text = await navigator.clipboard.readText();
+        if (text && (text.includes('tiktok.com') || text.includes('douyin.com'))) {
+          setUrl(prevUrl => {
+            if (prevUrl !== text) return text;
+            return prevUrl;
+          });
+        }
+      } catch (err) {
+        // Ignore errors, browser might not support it or permission denied
+      }
+    };
+
+    window.addEventListener('focus', handleFocus);
+    // Also trigger once on mount in case it's already focused
+    if (document.hasFocus()) {
+      handleFocus();
+    }
+
+    return () => {
+      window.removeEventListener('focus', handleFocus);
     };
   }, []);
 
@@ -495,6 +521,14 @@ function Downloader() {
                    <button onClick={handleClear} className="w-full flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-transparent text-[#5B6475] hover:text-[#121212] font-semibold text-[15px] transition-colors">
                       <RefreshCw className="w-5 h-5" /> Download Another Video
                    </button>
+                   {navigator.share && (
+                     <button
+                       onClick={() => navigator.share({ title: 'Download via TikFlow', text: 'Check this out!', url: downloadResult.downloadUrl })}
+                       className="w-full flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-transparent border border-gray-300 text-gray-700 font-semibold text-[16px] hover:bg-gray-50 transition-colors"
+                     >
+                        <Share2 className="w-5 h-5" /> Share Link
+                     </button>
+                   )}
                 </div>
               )}
 
@@ -550,6 +584,14 @@ function Downloader() {
                      <button onClick={handleClear} className="w-full flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-transparent text-[#5B6475] hover:text-[#121212] font-semibold text-[15px] transition-colors">
                         <RefreshCw className="w-5 h-5" /> Download Another Video
                      </button>
+                     {navigator.share && downloadResult.downloadUrl && (
+                       <button
+                         onClick={() => navigator.share({ title: 'Download via TikFlow', text: 'Check this out!', url: downloadResult.downloadUrl })}
+                         className="w-full flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-transparent border border-gray-300 text-gray-700 font-semibold text-[16px] hover:bg-gray-50 transition-colors mt-2"
+                       >
+                          <Share2 className="w-5 h-5" /> Share Link
+                       </button>
+                     )}
                   </div>
                 </>
               )}
