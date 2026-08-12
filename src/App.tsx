@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Download, ShieldCheck, Smartphone, Clipboard, ClipboardPaste, Info, Globe, CircleDollarSign, Image, Video, ChevronDown, ChevronUp, Check, Zap, X, Loader2, Play, MessageCircle, ArrowUpRight, RefreshCw } from 'lucide-react';
 import JSZip from 'jszip';
 import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 const LANGUAGES = [
   { code: 'en', flag: '🇺🇸', name: 'English' },
@@ -25,11 +26,11 @@ function Logo({ className = "w-6 h-6 sm:w-7 sm:h-7" }: { className?: string }) {
   );
 }
 
-const pageConfigs = {
+const getPageConfigs = (t: any) => ({
   '/': {
-    title: 'Tiktok Video Downloader',
-    subtitle: 'Free TikTok Downloader - No watermark, HD quality, works on all devices',
-    placeholder: 'Paste TikTok link here',
+    title: t('appTitle', 'Tiktok Video Downloader'),
+    subtitle: t('appSubtitle', 'Free TikTok Downloader - No watermark, HD quality, works on all devices'),
+    placeholder: t('placeholder', 'Paste TikTok link here...'),
     pageTitle: 'TikFlow - TikTok Video Downloader'
   },
   '/douyin-downloader': {
@@ -50,7 +51,7 @@ const pageConfigs = {
     placeholder: 'Paste TikTok story link here...',
     pageTitle: 'TikTok Story Downloader - TikFlow'
   }
-};
+});
 
 function RouteTransition() {
   const { pathname } = useLocation();
@@ -90,6 +91,9 @@ function RouteTransition() {
 
 function Downloader() {
   const location = useLocation();
+  const { t, i18n } = useTranslation();
+  
+  const pageConfigs = getPageConfigs(t);
   const config = pageConfigs[location.pathname as keyof typeof pageConfigs] || pageConfigs['/'];
 
   useEffect(() => {
@@ -151,7 +155,12 @@ function Downloader() {
 
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [isLangOpen, setIsLangOpen] = useState(false);
-  const [activeLang, setActiveLang] = useState('en');
+  const activeLang = i18n.language;
+  const handleLangChange = (code: string) => {
+    i18n.changeLanguage(code);
+    localStorage.setItem('lang', code);
+    setIsLangOpen(false);
+  };
   const [isLoading, setIsLoading] = useState(false);
   const [downloadingUrl, setDownloadingUrl] = useState<string | null>(null);
   const [isDownloadingZip, setIsDownloadingZip] = useState(false);
@@ -402,10 +411,7 @@ function Downloader() {
                 {LANGUAGES.map((lang) => (
                   <button
                     key={lang.code}
-                    onClick={() => {
-                      setActiveLang(lang.code);
-                      setIsLangOpen(false);
-                    }}
+                    onClick={() => handleLangChange(lang.code)}
                     className="w-full flex items-center justify-between px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors text-left"
                   >
                     <div className="flex items-center gap-3">
@@ -481,12 +487,12 @@ function Downloader() {
               {isLoading ? (
                 <>
                   <Loader2 className="w-5 h-5 animate-spin" strokeWidth={2.5} />
-                  Processing...
+                  {t('processing', 'Processing...')}
                 </>
               ) : (
                 <>
                   <Download className="w-5 h-5" strokeWidth={2.5} />
-                  Download
+                  {t('downloadBtn', 'Download')}
                 </>
               )}
             </button>
@@ -538,13 +544,13 @@ function Downloader() {
                      className="w-full flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-[#195FD7] text-white font-semibold text-[16px] hover:bg-[#0F4EC0] transition-colors shadow-sm disabled:opacity-70 disabled:cursor-not-allowed"
                    >
                       {downloadingUrl === downloadResult.downloadUrl ? (
-                        <><Loader2 className="w-5 h-5 animate-spin" /> Downloading...</>
+                        <><Loader2 className="w-5 h-5 animate-spin" /> {t('downloading', 'Downloading...')}</>
                       ) : (
-                        <><Download className="w-5 h-5" /> Download Video</>
+                        <><Download className="w-5 h-5" /> {t('downloadVideo', 'Download Video')}</>
                       )}
                    </button>
                    <button onClick={handleClear} className="w-full flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-transparent text-[#5B6475] hover:text-[#121212] font-semibold text-[15px] transition-colors">
-                      <RefreshCw className="w-5 h-5" /> Download Another Video
+                      <RefreshCw className="w-5 h-5" /> {t('downloadAnother', 'Download Another Video')}
                    </button>
                 </div>
               )}
@@ -565,7 +571,7 @@ function Downloader() {
                           disabled={downloadingUrl === img}
                           className="w-full flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg bg-[#195FD7] text-white font-semibold text-[13px] sm:text-[14px] hover:bg-[#0F4EC0] transition-colors shadow-sm disabled:opacity-70 disabled:cursor-not-allowed"
                         >
-                          {downloadingUrl === img ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />} Download
+                          {downloadingUrl === img ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />} {t('download', 'Download')}
                         </button>
                       </div>
                     ))}
@@ -578,9 +584,9 @@ function Downloader() {
                        className="w-full flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-transparent border-2 border-dashed border-gray-300 text-gray-700 font-semibold text-[16px] hover:bg-gray-50 hover:border-gray-400 transition-colors shadow-sm disabled:opacity-70 disabled:cursor-not-allowed"
                      >
                         {isDownloadingZip ? (
-                          <><Loader2 className="w-5 h-5 animate-spin" /> Creating ZIP...</>
+                          <><Loader2 className="w-5 h-5 animate-spin" /> {t('creatingZip', 'Creating ZIP...')}</>
                         ) : (
-                          <><Download className="w-5 h-5" /> Download All (ZIP) ({downloadResult.images.length})</>
+                          <><Download className="w-5 h-5" /> {t('downloadAllZip', 'Download All (ZIP)')} ({downloadResult.images.length})</>
                         )}
                      </button>
                      
@@ -591,15 +597,15 @@ function Downloader() {
                          className="w-full flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-[#195FD7] text-white font-semibold text-[16px] hover:bg-[#0F4EC0] transition-colors shadow-sm disabled:opacity-70 disabled:cursor-not-allowed"
                        >
                           {downloadingUrl === downloadResult.downloadUrl ? (
-                            <><Loader2 className="w-5 h-5 animate-spin" /> Downloading...</>
+                            <><Loader2 className="w-5 h-5 animate-spin" /> {t('downloading', 'Downloading...')}</>
                           ) : (
-                            <><Download className="w-5 h-5" /> Download Slideshow</>
+                            <><Download className="w-5 h-5" /> {t('downloadSlideshow', 'Download Slideshow')}</>
                           )}
                        </button>
                      )}
                      
                      <button onClick={handleClear} className="w-full flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-transparent text-[#5B6475] hover:text-[#121212] font-semibold text-[15px] transition-colors">
-                        <RefreshCw className="w-5 h-5" /> Download Another Video
+                        <RefreshCw className="w-5 h-5" /> {t('downloadAnother', 'Download Another Video')}
                      </button>
                   </div>
                 </>
@@ -616,22 +622,20 @@ function Downloader() {
             <div className="w-12 h-12 bg-[#EBF2FF] rounded-xl flex items-center justify-center mb-6">
               <Info className="w-6 h-6 text-[#195FD7]" strokeWidth={2.5} />
             </div>
-            
-            {/* Heading */}
+                  {/* Heading */}
             <h2 className="text-xl sm:text-2xl font-bold text-[#195FD7] mb-5">
-              Download TikTok Videos Without Watermark FREE
+              {t('infoHeading', 'Download TikTok Videos Without Watermark FREE')}
             </h2>
-
             {/* Divider */}
             <div className="w-16 h-1 bg-[#195FD7] rounded-full mb-8"></div>
             
             {/* Paragraphs */}
             <div className="space-y-6 text-gray-600 text-sm sm:text-base leading-relaxed max-w-3xl mx-auto">
               <p>
-                TikFlow is one of the best HD Tiktok Downloaders available online. TikFlow helps users download video tiktok without a watermark in MP4 format and in HD quality. You are not required to install any software on your computer or mobile phone. All that you need is a TikTok video link, paste the link to TikFlow and you can save your tiktok video instantly.
+                {t('infoP1', 'TikFlow is one of the best HD Tiktok Downloaders available online. TikFlow helps users download video tiktok without a watermark in MP4 format and in HD quality. You are not required to install any software on your computer or mobile phone. All that you need is a TikTok video link, paste the link to TikFlow and you can save your tiktok video instantly.')}
               </p>
               <p>
-                TikFlow provides users with the ability to download TikTok's photo slide show as Mp4 Video format. The images and music in the TikTok slide show will be automatically merged by TikFlow.
+                {t('infoP2', "TikFlow provides users with the ability to download TikTok's photo slide show as Mp4 Video format. The images and music in the TikTok slide show will be automatically merged by TikFlow.")}
               </p>
             </div>
           </div>
@@ -788,50 +792,40 @@ function Downloader() {
           <div className="flex flex-col space-y-4">
             {[
               {
-                question: "How to Download video TikTok no watermark?",
-                answer: (
-                  <ul className="list-disc pl-5 space-y-2 mt-4 text-sm sm:text-base text-gray-600 leading-relaxed">
-                    <li>Open TikTok app on your phone/or Web on your browser.</li>
-                    <li>Choose whatever video you want to download.</li>
-                    <li>Click to the Share button at the right bottom.</li>
-                    <li>Click the Copy Link button.</li>
-                    <li>Download by using your browsers: No need to download or install any software.</li>
-                    <li>Go back to TikFlow and paste your download link to the field above then click to the Download button.</li>
-                    <li>Wait for our server to do its job and then, save the video to your device.</li>
-                  </ul>
-                )
+                question: t('faq1q', 'How to Download video TikTok no watermark?'),
+                answer: <p className="mt-4 text-sm sm:text-base text-gray-600 leading-relaxed">{t('faq1a')}</p>
               },
               {
-                question: "How to get the TikTok video download link?",
-                answer: <p className="mt-4 text-sm sm:text-base text-gray-600 leading-relaxed">You can find it by tapping the "Share" button on the video and then selecting "Copy Link".</p>
+                question: t('faq2q', 'How to get the TikTok video download link?'),
+                answer: <p className="mt-4 text-sm sm:text-base text-gray-600 leading-relaxed">{t('faq2a')}</p>
               },
               {
-                question: "Where are TikTok videos saved after being downloaded?",
-                answer: <p className="mt-4 text-sm sm:text-base text-gray-600 leading-relaxed">They are usually saved in your device's default "Downloads" folder.</p>
+                question: t('faq3q', 'Where are TikTok videos saved after being downloaded?'),
+                answer: <p className="mt-4 text-sm sm:text-base text-gray-600 leading-relaxed">{t('faq3a')}</p>
               },
               {
-                question: "Is TikFlow safe to use?",
-                answer: <p className="mt-4 text-sm sm:text-base text-gray-600 leading-relaxed">Yes, TikFlow is completely safe. We do not store your videos or track your personal information.</p>
+                question: t('faq4q', 'Is TikFlow safe to use?'),
+                answer: <p className="mt-4 text-sm sm:text-base text-gray-600 leading-relaxed">{t('faq4a')}</p>
               },
               {
-                question: "Do I need to install any application or extension?",
-                answer: <p className="mt-4 text-sm sm:text-base text-gray-600 leading-relaxed">No, TikFlow is completely web-based. You don't need to install anything.</p>
+                question: t('faq5q', 'Do I need to install any application or extension?'),
+                answer: <p className="mt-4 text-sm sm:text-base text-gray-600 leading-relaxed">{t('faq5a')}</p>
               },
               {
-                question: "Do I have to pay to TikTok Downloader without watermark (TikFlow)?",
-                answer: <p className="mt-4 text-sm sm:text-base text-gray-600 leading-relaxed">No, our service is completely free to use. We only show some ads to support our server costs.</p>
+                question: t('faq6q', 'Do I have to pay to TikTok Downloader without watermark (TikFlow)?'),
+                answer: <p className="mt-4 text-sm sm:text-base text-gray-600 leading-relaxed">{t('faq6a')}</p>
               },
               {
-                question: "Can I use this TikTok video downloader on my Android phone?",
-                answer: <p className="mt-4 text-sm sm:text-base text-gray-600 leading-relaxed">Yes, TikFlow works perfectly on Android browsers like Chrome.</p>
+                question: t('faq7q', 'Can I use this TikTok video downloader on my Android phone?'),
+                answer: <p className="mt-4 text-sm sm:text-base text-gray-600 leading-relaxed">{t('faq7a')}</p>
               },
               {
-                question: "How do I save TikTok video to my iPhone (iOS)?",
-                answer: <p className="mt-4 text-sm sm:text-base text-gray-600 leading-relaxed">On iOS 13+, you can download directly via Safari. For older versions, you may need to use an app like "Documents by Readdle".</p>
+                question: t('faq8q', 'How do I save TikTok video to my iPhone (iOS)?'),
+                answer: <p className="mt-4 text-sm sm:text-base text-gray-600 leading-relaxed">{t('faq8a')}</p>
               },
               {
-                question: "Is there a limit to download TikTok videos at TikFlow?",
-                answer: <p className="mt-4 text-sm sm:text-base text-gray-600 leading-relaxed">No, there is no limit. You can download as many videos as you want.</p>
+                question: t('faq9q', 'Is there a limit to download TikTok videos at TikFlow?'),
+                answer: <p className="mt-4 text-sm sm:text-base text-gray-600 leading-relaxed">{t('faq9a')}</p>
               }
             ].map((faq, index) => (
               <div 
@@ -875,41 +869,41 @@ function Downloader() {
                 </div>
               </Link>
               <p className="text-gray-600 text-sm leading-relaxed">
-                The fastest and easiest way to download TikTok videos without watermark.
+                {t('footerDesc', 'The fastest and easiest way to download TikTok videos without watermark.')}
               </p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 w-full md:w-auto">
               {/* Quick Links */}
               <div className="flex flex-col gap-4">
-                <h4 className="font-bold text-gray-900 text-[15px]">Quick Links</h4>
-                <Link to="/" className="text-gray-600 hover:text-gray-900 text-[15px] transition-colors">Home</Link>
-                <Link to="/" className="text-gray-600 hover:text-gray-900 text-[15px] transition-colors">How to Download TikTok</Link>
+                <h4 className="font-bold text-gray-900 text-[15px]">{t('quickLinks', 'Quick Links')}</h4>
+                <Link to="/" className="text-gray-600 hover:text-gray-900 text-[15px] transition-colors">{t('home', 'Home')}</Link>
+                <Link to="/" className="text-gray-600 hover:text-gray-900 text-[15px] transition-colors">{t('howToDownloadMenu', 'How to Download TikTok')}</Link>
               </div>
 
               {/* Tools */}
               <div className="flex flex-col gap-4">
-                <h4 className="font-bold text-gray-900 text-[15px]">Tools</h4>
-                <Link to="/" className="text-gray-600 hover:text-gray-900 text-[15px] transition-colors">TikTok Notes Downloader</Link>
-                <Link to="/douyin-downloader" className="text-gray-600 hover:text-gray-900 text-[15px] transition-colors">Douyin Downloader</Link>
-                <Link to="/tiktok-slide-downloader" className="text-gray-600 hover:text-gray-900 text-[15px] transition-colors">TikTok Slide Downloader</Link>
-                <Link to="/tiktok-story-downloader" className="text-gray-600 hover:text-gray-900 text-[15px] transition-colors">TikTok Story Downloader</Link>
+                <h4 className="font-bold text-gray-900 text-[15px]">{t('tools', 'Tools')}</h4>
+                <Link to="/" className="text-gray-600 hover:text-gray-900 text-[15px] transition-colors">{t('notesDownloader', 'TikTok Notes Downloader')}</Link>
+                <Link to="/douyin-downloader" className="text-gray-600 hover:text-gray-900 text-[15px] transition-colors">{t('douyinDownloader', 'Douyin Downloader')}</Link>
+                <Link to="/tiktok-slide-downloader" className="text-gray-600 hover:text-gray-900 text-[15px] transition-colors">{t('slideDownloader', 'TikTok Slide Downloader')}</Link>
+                <Link to="/tiktok-story-downloader" className="text-gray-600 hover:text-gray-900 text-[15px] transition-colors">{t('storyDownloader', 'TikTok Story Downloader')}</Link>
               </div>
 
               {/* Legal */}
               <div className="flex flex-col gap-4">
-                <h4 className="font-bold text-gray-900 text-[15px]">Legal</h4>
-                <Link to="/" className="text-gray-600 hover:text-gray-900 text-[15px] transition-colors">Privacy Policy</Link>
-                <Link to="/" className="text-gray-600 hover:text-gray-900 text-[15px] transition-colors">Terms of Service</Link>
-                <Link to="/" className="text-gray-600 hover:text-gray-900 text-[15px] transition-colors">Cookie Policy</Link>
-                <Link to="/" className="text-gray-600 hover:text-gray-900 text-[15px] transition-colors">Contact</Link>
+                <h4 className="font-bold text-gray-900 text-[15px]">{t('legal', 'Legal')}</h4>
+                <Link to="/" className="text-gray-600 hover:text-gray-900 text-[15px] transition-colors">{t('privacyPolicy', 'Privacy Policy')}</Link>
+                <Link to="/" className="text-gray-600 hover:text-gray-900 text-[15px] transition-colors">{t('termsOfService', 'Terms of Service')}</Link>
+                <Link to="/" className="text-gray-600 hover:text-gray-900 text-[15px] transition-colors">{t('cookiePolicy', 'Cookie Policy')}</Link>
+                <Link to="/" className="text-gray-600 hover:text-gray-900 text-[15px] transition-colors">{t('contact', 'Contact')}</Link>
               </div>
             </div>
           </div>
 
           <div className="border-t border-gray-100 pt-8 flex flex-col items-center text-center gap-1.5">
             <p className="text-gray-500 text-[15px]">© 2026 TikFlow. All rights reserved.</p>
-            <p className="text-gray-400 text-sm">This service is not affiliated with TikTok or ByteDance.</p>
+            <p className="text-gray-400 text-sm">{t('disclaimer', 'This service is not affiliated with TikTok or ByteDance.')}</p>
             <p className="text-gray-400 text-[13px] mt-1">by prstyaDev</p>
           </div>
         </div>

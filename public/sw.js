@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tikflow-v2';
+const CACHE_NAME = 'tikflow-v3';
 const urlsToCache = [
   '/',
   '/index.html',
