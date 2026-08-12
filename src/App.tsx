@@ -124,12 +124,14 @@ function Downloader() {
   useEffect(() => {
     const handleFocus = async () => {
       try {
-        const text = await navigator.clipboard.readText();
-        if (text && (text.includes('tiktok.com') || text.includes('douyin.com'))) {
-          setUrl(prevUrl => {
-            if (prevUrl !== text) return text;
-            return prevUrl;
-          });
+        if (navigator.clipboard && typeof navigator.clipboard.readText === 'function') {
+          const text = await navigator.clipboard.readText();
+          if (text && (text.includes('tiktok.com') || text.includes('douyin.com'))) {
+            setUrl(prevUrl => {
+              if (prevUrl !== text) return text;
+              return prevUrl;
+            });
+          }
         }
       } catch (err) {
         // Ignore errors, browser might not support it or permission denied
