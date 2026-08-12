@@ -2,8 +2,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Download, ShieldCheck, Smartphone, Clipboard, Info, Globe, CircleDollarSign, Image, Video, ChevronDown, ChevronUp, Check, Zap, X, Loader2, Play, MessageCircle, ArrowUpRight, RefreshCw } from 'lucide-react';
 import JSZip from 'jszip';
 import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
-import SEO from './components/SEO';
-import { seoConfigs } from './config/seoConfig';
 
 const LANGUAGES = [
   { code: 'en', flag: '🇺🇸', name: 'English' },
@@ -93,7 +91,6 @@ function RouteTransition() {
 function Downloader() {
   const location = useLocation();
   const config = pageConfigs[location.pathname as keyof typeof pageConfigs] || pageConfigs['/'];
-  const seoConfig = seoConfigs[location.pathname as keyof typeof seoConfigs] || seoConfigs['/'];
 
   useEffect(() => {
     document.title = config.pageTitle;
@@ -120,6 +117,33 @@ function Downloader() {
     musicUrl?: string;
   } | null>(null);
   const langMenuRef = useRef<HTMLDivElement>(null);
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
+  }, []);
+
+  const handleInstallClick = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!deferredPrompt) {
+      alert('PWA install prompt is not available right now.');
+      return;
+    }
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      setDeferredPrompt(null);
+    }
+  };
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -256,14 +280,6 @@ function Downloader() {
 
   return (
     <div className="min-h-screen bg-white font-sans flex flex-col">
-      {/* SEO Component */}
-      <SEO 
-        title={seoConfig.title}
-        description={seoConfig.description}
-        keywords={seoConfig.keywords}
-        canonical={seoConfig.canonical}
-      />
-      
       {/* Navigation */}
       <header className="w-full bg-white border-b border-gray-200 sticky top-0 z-50">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 h-14 sm:h-16 flex items-center justify-between">
@@ -280,6 +296,7 @@ function Downloader() {
             
             <a
               href="#"
+              onClick={handleInstallClick}
               className="flex items-center gap-1.5 bg-[#EBF2FF] text-[#195FD7] text-[13px] sm:text-sm font-medium px-2.5 sm:px-3 py-2.5 rounded-lg hover:bg-[#d8e5ff] transition-colors"
             >
               <Smartphone className="w-3.5 h-3.5 sm:w-4 sm:h-4" strokeWidth={2} />
