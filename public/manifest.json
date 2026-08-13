@@ -4,10 +4,14 @@
   "short_name": "TikFlow",
   "description": "Download TikTok videos without watermark for free in HD quality.",
   "start_url": "/",
+  "scope": "/",
+  "lang": "en",
+  "dir": "ltr",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#1d4ed8",
   "orientation": "portrait",
+  "categories": ["utilities", "productivity", "entertainment"],
   "icons": [
     {
       "src": "/pwa-192x192.png",
