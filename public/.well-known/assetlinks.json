@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "com.prstyadev.tikflow",
+        "sha256_cert_fingerprints": ["E9:99:F0:90:65:8A:0B:8A:CB:16:5B:A9:E2:B5:E3:D0:14:29:7C:B6:F1:72:69:C6:25:24:1E:ED:EA:F7:A7:D3"]
+      }
+    }]
