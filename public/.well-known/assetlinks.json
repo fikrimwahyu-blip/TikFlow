@@ -3,6 +3,6 @@
       "target": {
         "namespace": "android_app",
         "package_name": "com.prstyadev.tikflow",
-        "sha256_cert_fingerprints": ["E9:99:F0:90:65:8A:0B:8A:CB:16:5B:A9:E2:B5:E3:D0:14:29:7C:B6:F1:72:69:C6:25:24:1E:ED:EA:F7:A7:D3"]
+        "sha256_cert_fingerprints": ["DF:9C:6A:AB:3F:CA:9D:FA:D7:82:1E:3F:2D:37:01:28:B4:B2:6B:9A:2A:EF:55:9D:76:71:0E:71:7D:94:C9:2B"]
       }
     }]
