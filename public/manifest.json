@@ -1,6 +1,6 @@
 {
   "id": "/",
-  "name": "TikFlow - TikTok Video Downloader",
+  "name": "TikFlow",
   "short_name": "TikFlow",
   "description": "Download TikTok videos without watermark for free in HD quality.",
   "start_url": "/",
@@ -8,7 +8,7 @@
   "lang": "en",
   "dir": "ltr",
   "display": "standalone",
-  "background_color": "#ffffff",
+  "background_color": "#1d4ed8",
   "theme_color": "#1d4ed8",
   "orientation": "portrait",
   "categories": ["utilities", "productivity", "entertainment"],
@@ -24,6 +24,29 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Douyin Downloader",
+      "short_name": "Douyin",
+      "description": "Download videos from Douyin",
+      "url": "/#douyin",
+      "icons": [{ "src": "/pwa-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Slide / Photo Downloader",
+      "short_name": "Slideshow",
+      "description": "Download TikTok photo slides",
+      "url": "/#slide",
+      "icons": [{ "src": "/pwa-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Story Downloader",
+      "short_name": "Story",
+      "description": "Download TikTok stories",
+      "url": "/#story",
+      "icons": [{ "src": "/pwa-192x192.png", "sizes": "192x192" }]
     }
   ],
   "screenshots": [
