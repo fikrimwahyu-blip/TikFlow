@@ -2,7 +2,14 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Download, ShieldCheck, Smartphone, Clipboard, ClipboardPaste, Info, Globe, CircleDollarSign, Image, Video, ChevronDown, ChevronUp, Check, Zap, X, Loader2, Play, MessageCircle, ArrowUpRight, RefreshCw } from 'lucide-react';
 import JSZip from 'jszip';
 import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
+import HowToDownload from './components/HowToDownload';
+import PrivacyPolicy from './components/PrivacyPolicy';
+import CookiePolicy from './components/CookiePolicy';
+import TermsOfService from './components/TermsOfService';
+import ContactUs from './components/ContactUs';
 import { useTranslation } from 'react-i18next';
+import Footer from './components/Footer';
+import ResultSkeleton from './components/ResultSkeleton';
 
 const LANGUAGES = [
   { code: 'en', flag: '🇺🇸', name: 'English' },
@@ -91,6 +98,7 @@ function RouteTransition() {
 
 function Downloader() {
   const location = useLocation();
+  const isHowToPage = location.pathname === '/how-to-download-tiktok';
   const { t, i18n } = useTranslation();
   
   const pageConfigs = getPageConfigs(t);
@@ -445,6 +453,7 @@ function Downloader() {
         </div>
       </header>
 
+      {isHowToPage ? <HowToDownload /> : (<>
       {/* Hero Section */}
       <section className={`w-full bg-[#195FD7] px-4 py-8 sm:py-12 flex flex-col items-center justify-center text-center ${downloadResult ? 'hidden' : ''}`}>
         <div className="max-w-2xl w-full mx-auto space-y-6">
@@ -518,10 +527,12 @@ function Downloader() {
       </section>
 
       {/* Main Content Area */}
-      <main className={`flex-1 max-w-5xl mx-auto px-4 sm:px-6 w-full ${downloadResult ? 'pt-8 pb-4' : 'py-12 sm:py-16'}`}>
+      <main className={`flex-1 max-w-5xl mx-auto px-4 sm:px-6 w-full ${(downloadResult || isLoading) ? 'pt-8 pb-4' : 'py-12 sm:py-16'}`}>
         
         {/* Download Result */}
-        {downloadResult && (
+        {isLoading ? (
+          <ResultSkeleton />
+        ) : downloadResult && (
           <section className="bg-white rounded-2xl shadow-[0px_4px_24px_rgba(0,0,0,0.06)] p-5 sm:p-6 mb-4 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-lg mx-auto">
             <div className="flex flex-col gap-6">
               {/* Header Info */}
@@ -870,59 +881,9 @@ function Downloader() {
         </div>
       </main>
 
+      </>)}
       {/* Footer */}
-      <footer className={`bg-gray-50 py-8 sm:py-12 border-t border-gray-200 ${downloadResult ? 'mt-4' : 'mt-12 sm:mt-16'}`}>
-        <div className="max-w-5xl mx-auto px-4 sm:px-6">
-          <div className="flex flex-col md:flex-row justify-between gap-10 md:gap-16 mb-10">
-            {/* Logo and Intro */}
-            <div className="max-w-sm">
-              <Link to="/" className="text-2xl sm:text-3xl font-extrabold tracking-tight flex items-center gap-1 mb-4">
-                <Logo />
-                <div className="flex items-center">
-                  <span className="text-slate-900">Tik</span>
-                  <span className="text-[#195FD7]">Flow</span>
-                </div>
-              </Link>
-              <p className="text-gray-600 text-sm leading-relaxed">
-                {t('footerDesc', 'The fastest and easiest way to download TikTok videos without watermark.')}
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 w-full md:w-auto">
-              {/* Quick Links */}
-              <div className="flex flex-col gap-4">
-                <h4 className="font-bold text-gray-900 text-[15px]">{t('quickLinks', 'Quick Links')}</h4>
-                <Link to="/" className="text-gray-600 hover:text-gray-900 text-[15px] transition-colors">{t('home', 'Home')}</Link>
-                <Link to="/" className="text-gray-600 hover:text-gray-900 text-[15px] transition-colors">{t('howToDownloadMenu', 'How to Download TikTok')}</Link>
-              </div>
-
-              {/* Tools */}
-              <div className="flex flex-col gap-4">
-                <h4 className="font-bold text-gray-900 text-[15px]">{t('tools', 'Tools')}</h4>
-                <Link to="/" className="text-gray-600 hover:text-gray-900 text-[15px] transition-colors">{t('notesDownloader', 'TikTok Notes Downloader')}</Link>
-                <Link to="/douyin-downloader" className="text-gray-600 hover:text-gray-900 text-[15px] transition-colors">{t('douyinDownloader', 'Douyin Downloader')}</Link>
-                <Link to="/tiktok-slide-downloader" className="text-gray-600 hover:text-gray-900 text-[15px] transition-colors">{t('slideDownloader', 'TikTok Slide Downloader')}</Link>
-                <Link to="/tiktok-story-downloader" className="text-gray-600 hover:text-gray-900 text-[15px] transition-colors">{t('storyDownloader', 'TikTok Story Downloader')}</Link>
-              </div>
-
-              {/* Legal */}
-              <div className="flex flex-col gap-4">
-                <h4 className="font-bold text-gray-900 text-[15px]">{t('legal', 'Legal')}</h4>
-                <Link to="/" className="text-gray-600 hover:text-gray-900 text-[15px] transition-colors">{t('privacyPolicy', 'Privacy Policy')}</Link>
-                <Link to="/" className="text-gray-600 hover:text-gray-900 text-[15px] transition-colors">{t('termsOfService', 'Terms of Service')}</Link>
-                <Link to="/" className="text-gray-600 hover:text-gray-900 text-[15px] transition-colors">{t('cookiePolicy', 'Cookie Policy')}</Link>
-                <Link to="/" className="text-gray-600 hover:text-gray-900 text-[15px] transition-colors">{t('contact', 'Contact')}</Link>
-              </div>
-            </div>
-          </div>
-
-          <div className="border-t border-gray-100 pt-8 flex flex-col items-center text-center gap-1.5">
-            <p className="text-gray-500 text-[15px]">© 2026 TikFlow. All rights reserved.</p>
-            <p className="text-gray-400 text-sm">{t('disclaimer', 'This service is not affiliated with TikTok or ByteDance.')}</p>
-            <p className="text-gray-400 text-[13px] mt-1">by prstyaDev</p>
-          </div>
-        </div>
-      </footer>
+      <Footer className={`bg-gray-50 py-8 sm:py-12 border-t border-gray-200 ${(downloadResult || isLoading) ? 'mt-4' : 'mt-12 sm:mt-16'}`} />
     </div>
   );
 }
@@ -932,6 +893,13 @@ export default function App() {
     <BrowserRouter>
       <RouteTransition />
       <Routes>
+        <Route path="/landing/privacy" element={<PrivacyPolicy />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/cookies" element={<CookiePolicy />} />
+        <Route path="/cookie-policy" element={<CookiePolicy />} />
+        <Route path="/terms" element={<TermsOfService />} />
+        <Route path="/terms-of-service" element={<TermsOfService />} />
+        <Route path="/contact" element={<ContactUs />} />
         <Route path="/*" element={<Downloader />} />
       </Routes>
     </BrowserRouter>
