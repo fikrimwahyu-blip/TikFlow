@@ -2,14 +2,20 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
-const Logo = () => (
-  <div className="relative flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 bg-black rounded-lg sm:rounded-xl shadow-sm overflow-hidden group">
-    <div className="absolute inset-0 bg-gradient-to-br from-gray-800 to-black"></div>
-    <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white relative z-10 transform group-hover:scale-110 transition-transform duration-300" fill="currentColor" viewBox="0 0 24 24">
-      <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z" />
+function Logo({ className = "w-8 h-8 sm:w-10 sm:h-10" }: { className?: string }) {
+  return (
+    <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+      <defs>
+        <linearGradient id="footer-logo-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#3b82f6" />
+          <stop offset="100%" stopColor="#195FD7" />
+        </linearGradient>
+      </defs>
+      <rect width="100" height="100" rx="24" fill="url(#footer-logo-grad)" />
+      <path d="M56 24 L32 54 H48 L40 76 L68 44 H52 Z" fill="#ffffff" stroke="#ffffff" strokeWidth="6" strokeLinejoin="round" strokeLinecap="round"/>
     </svg>
-  </div>
-);
+  );
+}
 
 interface FooterProps {
   className?: string;

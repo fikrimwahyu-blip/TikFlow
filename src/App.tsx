@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Download, ShieldCheck, Smartphone, Clipboard, ClipboardPaste, Info, Globe, CircleDollarSign, Image, Video, ChevronDown, ChevronUp, Check, Zap, X, Loader2, Play, MessageCircle, ArrowUpRight, RefreshCw } from 'lucide-react';
+import { Download, ShieldCheck, Smartphone, Clipboard, ClipboardPaste, Info, Globe, CircleDollarSign, Image, Video, ChevronDown, ChevronUp, Check, Zap, X, ChevronLeft, ChevronRight, Loader2, Play, MessageCircle, ArrowUpRight, RefreshCw } from 'lucide-react';
 import JSZip from 'jszip';
 import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
 import HowToDownload from './components/HowToDownload';
@@ -9,7 +9,6 @@ import TermsOfService from './components/TermsOfService';
 import ContactUs from './components/ContactUs';
 import { useTranslation } from 'react-i18next';
 import Footer from './components/Footer';
-import ResultSkeleton from './components/ResultSkeleton';
 
 const LANGUAGES = [
   { code: 'en', flag: '🇺🇸', name: 'English' },
@@ -169,6 +168,31 @@ function Downloader() {
     localStorage.setItem('lang', code);
     setIsLangOpen(false);
   };
+  
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [currentPreviewIndex, setCurrentPreviewIndex] = useState(0);
+
+  useEffect(() => {
+    if (isPreviewOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+  }, [isPreviewOpen]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsPreviewOpen(false);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  const openPreview = (index = 0) => {
+    setCurrentPreviewIndex(index);
+    setIsPreviewOpen(true);
+  };
+
   const [isLoading, setIsLoading] = useState(false);
   const [downloadingUrl, setDownloadingUrl] = useState<string | null>(null);
   const [isDownloadingZip, setIsDownloadingZip] = useState(false);
@@ -527,21 +551,22 @@ function Downloader() {
       </section>
 
       {/* Main Content Area */}
-      <main className={`flex-1 max-w-5xl mx-auto px-4 sm:px-6 w-full ${(downloadResult || isLoading) ? 'pt-8 pb-4' : 'py-12 sm:py-16'}`}>
+      <main className={`flex-1 max-w-5xl mx-auto px-4 sm:px-6 w-full ${downloadResult ? 'pt-8 pb-4' : 'py-12 sm:py-16'}`}>
         
         {/* Download Result */}
-        {isLoading ? (
-          <ResultSkeleton />
-        ) : downloadResult && (
+        {downloadResult && (
           <section className="bg-white rounded-2xl shadow-[0px_4px_24px_rgba(0,0,0,0.06)] p-5 sm:p-6 mb-4 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-lg mx-auto">
             <div className="flex flex-col gap-6">
               {/* Header Info */}
               <div className="flex flex-row gap-4">
                 {/* Thumbnail */}
-                <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
-                   <img src={downloadResult.thumbnail} alt="Video Thumbnail" className="w-full h-full object-cover" />
-                   <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
-                       <div className="w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center">
+                <div 
+                  className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0 cursor-pointer group"
+                  onClick={() => openPreview(0)}
+                >
+                   <img src={downloadResult.thumbnail} alt="Video Thumbnail" className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                   <div className="absolute inset-0 bg-black/20 flex items-center justify-center transition-colors duration-300 group-hover:bg-black/30">
+                       <div className="w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center transform transition-transform duration-300 group-hover:scale-110">
                            <Play className="w-5 h-5 text-gray-900 ml-1" fill="currentColor" />
                        </div>
                    </div>
@@ -586,11 +611,15 @@ function Downloader() {
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 mt-4">
                     {downloadResult.images.map((img, idx) => (
                       <div key={idx} className="flex flex-col gap-2">
-                        <div className="relative rounded-xl overflow-hidden aspect-[3/4] bg-gray-100 border border-gray-200">
-                           <img src={img} alt={`Slide ${idx + 1}`} className="w-full h-full object-cover" />
+                        <div 
+                          className="relative rounded-xl overflow-hidden aspect-[3/4] bg-gray-100 border border-gray-200 cursor-pointer group"
+                          onClick={() => openPreview(idx)}
+                        >
+                           <img src={img} alt={`Slide ${idx + 1}`} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
                            <div className="absolute top-2 left-2 bg-black/60 text-white text-xs px-2 py-1 rounded-md font-medium backdrop-blur-sm">
                              {idx + 1}
                            </div>
+                           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
                         </div>
                         <button 
                           onClick={() => handleDownloadFile(img)}
@@ -882,8 +911,72 @@ function Downloader() {
       </main>
 
       </>)}
+      
+      {/* Preview Modal */}
+      {isPreviewOpen && downloadResult && (
+        <div 
+          className="bg-black/80 backdrop-blur-sm z-50 fixed inset-0 flex items-center justify-center p-4"
+          onClick={() => setIsPreviewOpen(false)}
+        >
+          <button 
+            onClick={() => setIsPreviewOpen(false)}
+            className="absolute top-4 right-4 sm:top-6 sm:right-6 text-white hover:text-gray-300 transition-colors z-[60] bg-black/20 hover:bg-black/40 rounded-full p-2"
+          >
+            <X className="w-6 h-6 sm:w-8 sm:h-8" />
+          </button>
+          
+          <div 
+            className="relative w-full max-w-4xl flex items-center justify-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {downloadResult.type === 'video' && downloadResult.downloadUrl ? (
+              <video 
+                src={downloadResult.downloadUrl} 
+                controls 
+                autoPlay 
+                className="max-h-[80vh] max-w-full rounded-2xl shadow-2xl"
+              />
+            ) : downloadResult.type === 'image' && downloadResult.images ? (
+              <div className="relative flex items-center justify-center w-full">
+                <img 
+                  src={downloadResult.images[currentPreviewIndex]} 
+                  alt={`Preview ${currentPreviewIndex + 1}`}
+                  className="max-h-[80vh] max-w-full rounded-2xl shadow-2xl object-contain"
+                />
+                
+                {downloadResult.images.length > 1 && (
+                  <>
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setCurrentPreviewIndex(prev => prev > 0 ? prev - 1 : downloadResult.images!.length - 1);
+                      }}
+                      className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 backdrop-blur-md text-white p-2 sm:p-3 rounded-full transition-colors"
+                    >
+                      <ChevronLeft className="w-6 h-6 sm:w-8 sm:h-8" />
+                    </button>
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setCurrentPreviewIndex(prev => prev < downloadResult.images!.length - 1 ? prev + 1 : 0);
+                      }}
+                      className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 backdrop-blur-md text-white p-2 sm:p-3 rounded-full transition-colors"
+                    >
+                      <ChevronRight className="w-6 h-6 sm:w-8 sm:h-8" />
+                    </button>
+                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/60 text-white text-sm px-3 py-1.5 rounded-full font-medium backdrop-blur-sm">
+                      {currentPreviewIndex + 1} / {downloadResult.images.length}
+                    </div>
+                  </>
+                )}
+              </div>
+            ) : null}
+          </div>
+        </div>
+      )}
+
       {/* Footer */}
-      <Footer className={`bg-gray-50 py-8 sm:py-12 border-t border-gray-200 ${(downloadResult || isLoading) ? 'mt-4' : 'mt-12 sm:mt-16'}`} />
+      <Footer className={`bg-gray-50 py-8 sm:py-12 border-t border-gray-200 ${downloadResult ? 'mt-4' : 'mt-12 sm:mt-16'}`} />
     </div>
   );
 }
