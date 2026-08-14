@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://tikflow.app/sitemap.xml
+Sitemap: https://tikflow-prstyadev.vercel.app/sitemap.xml
