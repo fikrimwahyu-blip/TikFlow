@@ -1,6 +1,6 @@
 {
-  "name": "TikFlow",
-  "short_name": "TikFlow",
+  "name": "TikSave",
+  "short_name": "TikSave",
   "description": "by prstyaDev",
   "start_url": "/",
   "display": "standalone",
