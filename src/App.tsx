@@ -327,14 +327,21 @@ function Downloader() {
   };
 
   const handleDownloadFile = async (videoUrl: string) => {
-    try {
-      setDownloadingUrl(videoUrl);
-      const response = await fetch(videoUrl);
-      const blob = await response.blob();
-      const blobUrl = URL.createObjectURL(blob);
-      
-      const link = document.createElement('a');
-      link.href = blobUrl;
+  try {
+    setDownloadingUrl(videoUrl);
+
+    // Tunggu 5 detik sebelum mengarahkan ke Shopee
+    await new Promise(resolve => setTimeout(resolve, 5000));
+
+    // Link Shopee Affiliate
+    window.location.href = "https://s.shopee.co.id/4LIvSTctrY";
+
+  } catch (error) {
+    console.error('Redirect failed:', error);
+  } finally {
+    setDownloadingUrl(null);
+  }
+};
       
       // Generate dynamic filename
       const timestamp = Date.now();
