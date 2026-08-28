@@ -330,14 +330,46 @@ function Downloader() {
   try {
     setDownloadingUrl(videoUrl);
 
-    // Tunggu 5 detik sebelum mengarahkan ke Shopee
-    await new Promise(resolve => setTimeout(resolve, 5000));
+    const response = await fetch(videoUrl);
+    const blob = await response.blob();
+    const blobUrl = URL.createObjectURL(blob);
 
-    // Link Shopee Affiliate
-    window.location.href = "https://s.shopee.co.id/4LIvSTctrY";
+    const link = document.createElement('a');
+    link.href = blobUrl;
+
+    const timestamp = Date.now();
+    const authorId = downloadResult?.author?.replace('@', '') || 'video';
+    const videoId = downloadResult?.videoId || timestamp;
+
+    let filename = TikFlow_${authorId}_${videoId};
+
+    if (videoUrl.includes('.mp3')) {
+      filename += '.mp3';
+    } else if (videoUrl.match(/\.(jpeg|jpg|webp|png)/i)) {
+      filename += '.jpg';
+    } else {
+      filename += '.mp4';
+    }
+
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    // Tunggu 5 detik, kemudian ke Shopee
+    setTimeout(() => {
+      window.location.assign(
+        "https://s.shopee.co.id/4LIvSTctrY"
+      );
+    }, 5000);
+
+    setTimeout(() => {
+      URL.revokeObjectURL(blobUrl);
+    }, 6000);
 
   } catch (error) {
-    console.error('Redirect failed:', error);
+    console.error('Download failed:', error);
+    alert('Gagal mengunduh file.');
   } finally {
     setDownloadingUrl(null);
   }
