@@ -608,6 +608,40 @@ function Downloader() {
   useEffect(() => {
     document.title = config.pageTitle;
   }, [config.pageTitle]);
+
+  /* -------------------------------------------------------
+     META DESCRIPTION
+  ------------------------------------------------------- */
+  useEffect(() => {
+    const descriptions: Record<string, string> = {
+      '/':
+        'TikFlow is a free TikTok video downloader that lets you download TikTok videos without watermark in HD quality on mobile and desktop.',
+
+      '/douyin-downloader':
+        'Download Douyin videos without watermark using TikFlow. Free online Douyin video downloader for mobile and desktop.',
+
+      '/tiktok-slide-downloader':
+        'Download TikTok slideshow photos and videos without watermark. Free TikTok slideshow downloader by TikFlow.',
+
+      '/tiktok-story-downloader':
+        'Download TikTok Stories in HD without watermark using TikFlow. Free online TikTok Story Downloader.',
+    };
+
+    const description =
+      descriptions[location.pathname] || descriptions['/'];
+
+    let meta = document.querySelector(
+      'meta[name="description"]'
+    ) as HTMLMetaElement | null;
+
+    if (!meta) {
+      meta = document.createElement('meta');
+      meta.name = 'description';
+      document.head.appendChild(meta);
+    }
+
+    meta.content = description;
+  }, [location.pathname]);
   /* -------------------------------------------------------
      BASIC STATES
   ------------------------------------------------------- */
