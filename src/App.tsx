@@ -607,7 +607,18 @@ function Downloader() {
   ------------------------------------------------------- */
 
   useEffect(() => {
-      const descriptions: Record<string, string> = {
+      /* -------------------------------------------------------
+   PAGE TITLE
+------------------------------------------------------- */
+useEffect(() => {
+  document.title = config.pageTitle;
+}, [config.pageTitle]);
+
+/* -------------------------------------------------------
+   META DESCRIPTION
+------------------------------------------------------- */
+useEffect(() => {
+  const descriptions: Record<string, string> = {
     '/':
       'TikFlow is a free TikTok video downloader that lets you download TikTok videos without watermark in HD quality on mobile and desktop.',
 
@@ -622,13 +633,11 @@ function Downloader() {
   };
 
   const description =
-    descriptions[location.pathname] ||
-    descriptions['/'];
+    descriptions[location.pathname] || descriptions['/'];
 
-  let meta =
-    document.querySelector(
-      'meta[name="description"]'
-    ) as HTMLMetaElement | null;
+  let meta = document.querySelector(
+    'meta[name="description"]'
+  ) as HTMLMetaElement | null;
 
   if (!meta) {
     meta = document.createElement('meta');
@@ -638,8 +647,6 @@ function Downloader() {
 
   meta.content = description;
 }, [location.pathname]);
-    document.title = config.pageTitle;
-  }, [config.pageTitle]);
 
   /* -------------------------------------------------------
      BASIC STATES
