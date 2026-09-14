@@ -2050,7 +2050,7 @@ function Downloader() {
                     <p>
                       {t(
                         'infoP1',
-                        'TikFlow is one of the best HD TikTok Downloaders available online. TikFlow helps users download TikTok videos without a watermark in MP4 format and in HD quality. You are not required to install any software on your computer or mobile phone. All that you need is a TikTok video link, paste the link to TikFlow and you can save your TikTok video instantly.'
+                        'TikFlow is a free online TikTok video downloader that helps you download available TikTok videos without a watermark in HD quality. You can use TikFlow directly in your browser without installing additional software.'
                       )}
                     </p>
 
