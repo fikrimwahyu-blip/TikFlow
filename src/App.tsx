@@ -608,6 +608,12 @@ function Downloader() {
 useEffect(() => {
   document.title = config.pageTitle;
 }, [config.pageTitle]);
+/* -------------------------------------------------------
+   PAGE TITLE
+------------------------------------------------------- */
+useEffect(() => {
+  document.title = config.pageTitle;
+}, [config.pageTitle]);
 
 /* -------------------------------------------------------
    META DESCRIPTION
@@ -642,6 +648,7 @@ useEffect(() => {
 
   meta.content = description;
 }, [location.pathname]);
+
   /* -------------------------------------------------------
      BASIC STATES
   ------------------------------------------------------- */
