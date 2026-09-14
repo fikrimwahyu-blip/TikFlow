@@ -601,14 +601,7 @@ function Downloader() {
     pageConfigs[
       location.pathname as keyof typeof pageConfigs
     ] || pageConfigs['/'];
-
-  /* -------------------------------------------------------
-   PAGE TITLE
-------------------------------------------------------- */
-useEffect(() => {
-  document.title = config.pageTitle;
-}, [config.pageTitle]);
-/* -------------------------------------------------------
+  
    PAGE TITLE
 ------------------------------------------------------- */
 useEffect(() => {
@@ -648,7 +641,6 @@ useEffect(() => {
 
   meta.content = description;
 }, [location.pathname]);
-
   /* -------------------------------------------------------
      BASIC STATES
   ------------------------------------------------------- */
